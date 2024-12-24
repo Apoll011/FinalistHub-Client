@@ -52,8 +52,8 @@ const ProfileManagement: React.FC = () => {
             await changeUserRole(selectedUser, selectedRole);
             setSuccess(`Função atualizada para ${selectedUser}`);
             await loadUsers();
-        } catch {
-            setError('Falha ao alterar a função do usuário');
+        } catch (error) {
+            setError('Falha ao alterar a função do usuário: ' + error);
         }
     };
 

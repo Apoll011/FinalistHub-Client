@@ -20,13 +20,14 @@ interface AuthContextType {
     isAdmin: boolean;
 }
 
+const AuthContext = createContext<AuthContextType | null>(null);
+
 interface AuthProviderProps {
     children: ReactNode;
 }
 
 const API_BASE_URL = 'https://finalisthub-server.onrender.com';
 const PROTECTED_USERNAME = 'apoll011';
-const AUTH_TOKEN_KEY = 'authToken';
 
 const ENDPOINTS = {
     me: `${API_BASE_URL}/auth/me`,
@@ -38,146 +39,191 @@ const ENDPOINTS = {
     deleteUser: (username: string) => `${API_BASE_URL}/auth/user/${username}`,
 };
 
-class AuthError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = 'AuthError';
-    }
-}
-
-const AuthContext = createContext<AuthContextType | null>(null);
-
-const useApiRequest = (token: string | null) => {
-    const headers = {
-        'Content-Type': 'application/json',
-        ...(token && { Authorization: `Bearer ${token}` }),
-    };
-
-    const handleResponse = async (response: Response) => {
-        if (!response.ok) {
-            const error = await response.text();
-            throw new AuthError(error || 'Request failed');
-        }
-        return response.json();
-    };
-
-    return async (
-        url: string,
-        options: RequestInit = {}
-    ) => {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                headers: { ...headers, ...options.headers },
-            });
-            return await handleResponse(response);
-        } catch (error) {
-            console.error(`API request failed: ${url}`, error);
-            throw error;
-        }
-    };
-};
-
-const validateUser = (username: string) => {
-    if (username === PROTECTED_USERNAME) {
-        throw new AuthError('Não mecha no que não é teu.');
-    }
-};
-
-const checkAdminAuthorization = (user: User | null) => {
-    if (!user || user.role !== 'admin') {
-        throw new AuthError('Sem Acesso: É preciso ser administrador');
-    }
-};
-
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
-    const apiRequest = useApiRequest(user?.token || null);
 
     useEffect(() => {
-        const initializeAuth = async () => {
-            const token = localStorage.getItem(AUTH_TOKEN_KEY);
-            if (token) {
-                try {
-                    const userData = await apiRequest(ENDPOINTS.me);
-                    setUser({ ...userData, token });
-                } catch (error) {
-                    localStorage.removeItem(AUTH_TOKEN_KEY);
-                } finally {
-                    setLoading(false);
-                }
-            } else {
-                setLoading(false);
-            }
-        };
-
-        initializeAuth().then(() => {});
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            fetchUserData(token);
+        } else {
+            setLoading(false);
+        }
     }, []);
 
+    const fetchUserData = async (token: string): Promise<void> => {
+        try {
+            const response = await fetch(ENDPOINTS.me, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (response.ok) {
+                const userData = await response.json();
+                setUser({ ...userData, token });
+            } else {
+                localStorage.removeItem('authToken');
+            }
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+            localStorage.removeItem('authToken');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const register = async (username: string, password: string, role: string = 'member'): Promise<void> => {
-        await apiRequest(ENDPOINTS.register, {
-            method: 'POST',
-            body: JSON.stringify({ username, password, role }),
-        });
+        try {
+            const response = await fetch(ENDPOINTS.register, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password, role }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Registration failed');
+            }
+        } catch (error) {
+            console.error('Error during registration:', error);
+            throw error;
+        }
     };
 
     const login = async (username: string, password: string): Promise<void> => {
-        const data = await apiRequest(ENDPOINTS.login, {
-            method: 'POST',
-            body: JSON.stringify({ username, password }),
-        });
+        try {
+            const response = await fetch(ENDPOINTS.login, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            });
 
-        localStorage.setItem(AUTH_TOKEN_KEY, data.access_token);
-        const userData = await apiRequest(ENDPOINTS.me);
-        setUser({ ...userData, token: data.access_token });
+            if (!response.ok) {
+                throw new Error('Login failed');
+            }
+
+            const data = await response.json();
+            localStorage.setItem('authToken', data.access_token);
+            await fetchUserData(data.access_token);
+        } catch (error) {
+            console.error('Error during login:', error);
+            throw error;
+        }
     };
 
     const logout = (): void => {
-        localStorage.removeItem(AUTH_TOKEN_KEY);
+        localStorage.removeItem('authToken');
         setUser(null);
     };
 
     const getUsers = async (): Promise<User[]> => {
-        checkAdminAuthorization(user);
-        return await apiRequest(ENDPOINTS.users);
+        if (!user || user.role !== 'admin') {
+            throw new Error('Unauthorized: Admin access required');
+        }
+
+        try {
+            const response = await fetch(ENDPOINTS.users, {
+                headers: {
+                    Authorization: `Bearer ${user.token}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch users');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching users:', error);
+            throw error;
+        }
     };
 
-    const changeUserRole = async (username: string, newRole: string): Promise<void> => {
-        checkAdminAuthorization(user);
-        validateUser(username);
 
-        await apiRequest(ENDPOINTS.changeRole, {
-            method: 'PATCH',
-            body: JSON.stringify({ username, new_role: newRole }),
-        });
+    const changeUserRole = async (username: string, newRole: string): Promise<void> => {
+        if (!user || user.role !== 'admin') {
+            throw new Error('Unauthorized: Admin access required');
+        }
+
+        if (username === PROTECTED_USERNAME) {
+            throw new Error('Não mecha no que não é teu.');
+        }
+
+        try {
+            const response = await fetch(`${ENDPOINTS.changeRole}?username=${username}&new_role=${newRole}`, {
+                method: 'PATCH',
+                headers: {
+                    Authorization: `Bearer ${user.token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to change user role');
+            }
+        } catch (error) {
+            console.error('Error changing user role:', error);
+            throw error;
+        }
     };
 
     const changePassword = async (newPassword: string): Promise<void> => {
         if (!user) {
-            throw new AuthError('Usuario não logado.');
+            throw new Error('No user logged in');
         }
 
-        await apiRequest(ENDPOINTS.changePassword, {
-            method: 'PATCH',
-            body: JSON.stringify({ new_password: newPassword }),
-        });
+        try {
+            const response = await fetch(ENDPOINTS.changePassword, {
+                method: 'PATCH',
+                headers: {
+                    Authorization: `Bearer ${user.token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ "new_password": newPassword }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to change password');
+            }
+        } catch (error) {
+            console.error('Error changing password:', error);
+            throw error;
+        }
     };
 
     const deleteUser = async (username: string): Promise<void> => {
-        if (!user || user.username !== username) {
-            throw new AuthError('Sem Autorização: Não podes Deletar este usuario!');
+        if (!user || (user.role !== 'admin' && user.username !== username)) {
+            throw new Error('Unauthorized');
         }
 
-        checkAdminAuthorization(user)
-        validateUser(username);
+        if (username === 'apoll011') {
+            throw new Error('Não mecha no que não é teu.')
+        }
 
-        await apiRequest(ENDPOINTS.deleteUser(username), {
-            method: 'DELETE',
-        });
+        try {
+            const response = await fetch(ENDPOINTS.deleteUser(username), {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${user.token}`,
+                },
+            });
 
-        if (user.username === username) {
-            logout();
+            if (!response.ok) {
+                throw new Error('Failed to delete user');
+            }
+
+            // If the user deleted their own account, log them out
+            if (user.username === username) {
+                logout();
+            }
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            throw error;
         }
     };
 
