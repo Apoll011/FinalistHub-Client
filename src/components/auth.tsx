@@ -43,6 +43,55 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
 
+    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+    const fetchWithRetry = async (url: string, options: RequestInit, maxRetries = 3, retryDelay = 2000): Promise<Response> => {
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                const response = await fetch(url, options);
+
+                if (response.ok) {
+                    return response;
+                }
+
+                if (attempt === maxRetries) {
+                    throw new Error(`Failed after ${maxRetries} attempts`);
+                }
+
+                await delay(retryDelay);
+            } catch (error) {
+                if (attempt === maxRetries) {
+                    throw error;
+                }
+                await delay(retryDelay);
+            }
+        }
+        throw new Error('Unexpected end of retry loop');
+    };
+
+    const fetchUserData = async (token: string): Promise<void> => {
+        try {
+            const response = await fetchWithRetry(
+                ENDPOINTS.me,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                },
+                3,  // max retries
+                2000 // delay between retries in ms
+            );
+
+            const userData = await response.json();
+            setUser({ ...userData, token });
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+            localStorage.removeItem('authToken');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         const token = localStorage.getItem('authToken');
         if (token) {
@@ -52,60 +101,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     }, []);
 
-    const fetchUserData = async (token: string): Promise<void> => {
-        try {
-            const response = await fetch(ENDPOINTS.me, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            if (response.ok) {
-                const userData = await response.json();
-                setUser({ ...userData, token });
-            } else {
-                localStorage.removeItem('authToken');
-            }
-        } catch (error) {
-            console.error('Error fetching user data:', error);
-            localStorage.removeItem('authToken');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const register = async (username: string, password: string, role: string = 'member'): Promise<void> => {
-        try {
-            const response = await fetch(ENDPOINTS.register, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username, password, role }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Registration failed');
-            }
-        } catch (error) {
-            console.error('Error during registration:', error);
-            throw error;
-        }
-    };
-
     const login = async (username: string, password: string): Promise<void> => {
         try {
-            const response = await fetch(ENDPOINTS.login, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
+            const response = await fetchWithRetry(
+                ENDPOINTS.login,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password }),
                 },
-                body: JSON.stringify({ username, password }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Login failed');
-            }
+                3,
+                2000
+            );
 
             const data = await response.json();
             localStorage.setItem('authToken', data.access_token);
@@ -116,26 +125,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
-    const logout = (): void => {
-        localStorage.removeItem('authToken');
-        setUser(null);
-    };
-
+    // Update other API calls to use fetchWithRetry
     const getUsers = async (): Promise<User[]> => {
         if (!user || user.role !== 'admin') {
             throw new Error('Unauthorized: Admin access required');
         }
 
         try {
-            const response = await fetch(ENDPOINTS.users, {
-                headers: {
-                    Authorization: `Bearer ${user.token}`,
+            const response = await fetchWithRetry(
+                ENDPOINTS.users,
+                {
+                    headers: {
+                        Authorization: `Bearer ${user.token}`,
+                    },
                 },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch users');
-            }
+                3,
+                2000
+            );
 
             return await response.json();
         } catch (error) {
@@ -143,7 +149,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             throw error;
         }
     };
-
 
     const changeUserRole = async (username: string, newRole: string): Promise<void> => {
         if (!user || user.role !== 'admin') {
@@ -155,17 +160,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
 
         try {
-            const response = await fetch(`${ENDPOINTS.changeRole}?username=${username}&new_role=${newRole}`, {
-                method: 'PATCH',
-                headers: {
-                    Authorization: `Bearer ${user.token}`,
-                    'Content-Type': 'application/json',
+            await fetchWithRetry(
+                `${ENDPOINTS.changeRole}?username=${username}&new_role=${newRole}`,
+                {
+                    method: 'PATCH',
+                    headers: {
+                        Authorization: `Bearer ${user.token}`,
+                        'Content-Type': 'application/json',
+                    },
                 },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to change user role');
-            }
+                3,
+                2000
+            );
         } catch (error) {
             console.error('Error changing user role:', error);
             throw error;
@@ -178,18 +184,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
 
         try {
-            const response = await fetch(ENDPOINTS.changePassword, {
-                method: 'PATCH',
-                headers: {
-                    Authorization: `Bearer ${user.token}`,
-                    'Content-Type': 'application/json',
+            await fetchWithRetry(
+                ENDPOINTS.changePassword,
+                {
+                    method: 'PATCH',
+                    headers: {
+                        Authorization: `Bearer ${user.token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ "new_password": newPassword }),
                 },
-                body: JSON.stringify({ "new_password": newPassword }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to change password');
-            }
+                3,
+                2000
+            );
         } catch (error) {
             console.error('Error changing password:', error);
             throw error;
@@ -206,18 +213,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
 
         try {
-            const response = await fetch(ENDPOINTS.deleteUser(username), {
-                method: 'DELETE',
-                headers: {
-                    Authorization: `Bearer ${user.token}`,
+            await fetchWithRetry(
+                ENDPOINTS.deleteUser(username),
+                {
+                    method: 'DELETE',
+                    headers: {
+                        Authorization: `Bearer ${user.token}`,
+                    },
                 },
-            });
+                3,
+                2000
+            );
 
-            if (!response.ok) {
-                throw new Error('Failed to delete user');
-            }
-
-            // If the user deleted their own account, log them out
             if (user.username === username) {
                 logout();
             }
@@ -225,6 +232,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             console.error('Error deleting user:', error);
             throw error;
         }
+    };
+
+    const register = async (username: string, password: string, role: string = 'member'): Promise<void> => {
+        try {
+            await fetchWithRetry(
+                ENDPOINTS.register,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password, role }),
+                },
+                3,
+                2000
+            );
+        } catch (error) {
+            console.error('Error during registration:', error);
+            throw error;
+        }
+    };
+
+    const logout = (): void => {
+        localStorage.removeItem('authToken');
+        setUser(null);
     };
 
     return (
