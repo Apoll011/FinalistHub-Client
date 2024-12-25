@@ -4,6 +4,7 @@ import React, {useEffect, useState} from "react";
 import { useAuth } from 'components/auth.tsx';
 import { useMounted } from "hooks/useMounted";
 import { Modal } from 'react-bootstrap';
+import {EventsApi} from "api";
 
 const SignUp = () => {
   const hasMounted = useMounted();
@@ -14,7 +15,7 @@ const SignUp = () => {
     username: '',
     password: '',
     confirmPassword: '',
-    terms: false
+    terms: false,
   });
 
   const [loading, setLoading] = useState(false);
@@ -24,8 +25,35 @@ const SignUp = () => {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+
+
   const [username, setUsername] = useState('');
   const [profileImage, setProfileImage] = useState('');
+
+  const [authenticatedAsAdmin, setAuthenticated] = useState(false);
+  const [authError, setAuthError] = useState(false);
+
+  const [showAuth, setShowAuth] = useState(false);
+
+  const handleAuthClose = () => setShowAuth(false);
+  const handleAuthShow = () => setShowAuth(true);
+
+
+  const handleAuthSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const target = e.target as HTMLFormElement;
+
+    if(target.admin.value === "eicm24/25"){
+      setAuthenticated(true);
+      handleAuthClose();
+    }
+    else {
+      setAuthError(true);
+    }
+  };
+
+
 
   useEffect(() => {
     if (username) {
@@ -67,11 +95,11 @@ const SignUp = () => {
     }
 
     try {
-      await register(formData.username, formData.password);
+      await register(formData.username, formData.password, authenticatedAsAdmin ? "admin" : "member");
       await login(formData.username, formData.password);
       navigate('/');
     } catch {
-      setError('Erro ao registrar. Tente outro nome de Usuario!');
+      setError('Erro ao registrar. Tente outro nome de Usuário!');
       setLoading(false);
     }
   };
@@ -146,6 +174,17 @@ const SignUp = () => {
                         />
                         <Form.Check.Label>
                           Eu concordo com os <span style={{color: "blue", cursor: "pointer"}} onClick={handleShow}> Termos de Serviço </span>.
+                        </Form.Check.Label>
+                      </Form.Check>
+                      <Form.Check type="checkbox" id="admin" >
+                        <Form.Check.Input
+                            type="checkbox"
+                            name="admin"
+                            checked={authenticatedAsAdmin}
+                            onClick={handleAuthShow}
+                        />
+                        <Form.Check.Label>
+                          És um <span style={{color: "blue", cursor: "pointer"}}>Administrador</span>?
                         </Form.Check.Label>
                       </Form.Check>
                     </div>
@@ -265,6 +304,37 @@ const SignUp = () => {
                 Fechar
               </Button>
             </Modal.Footer>
+          </Modal>
+          <Modal show={showAuth} onHide={handleAuthClose}>
+            <Modal.Header closeButton>
+              <Modal.Title>És um Administrador insira a palavra-passe mestra:</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              {authError && (
+                  <div className="alert alert-danger">Palavra-passe incorreta!</div>
+              )}
+              <Form onSubmit={handleAuthSubmit}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Palavra-passe</Form.Label>
+                  <Form.Control
+                      type="password"
+                      name="admin"
+                      placeholder="**********"
+                      required
+                  />
+                </Form.Group>
+
+                <div className="d-flex justify-content-end gap-2">
+                  <Button variant="secondary" onClick={handleAuthClose}>
+                    Cancelar
+                  </Button>
+                  <Button variant="primary" type="submit">
+                    Autenticar
+                  </Button>
+                </div>
+              </Form>
+
+            </Modal.Body>
           </Modal>
 
         </Col>
