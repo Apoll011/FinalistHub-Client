@@ -1,4 +1,4 @@
-import { Row, Col, Card, Form, Button, Image } from "react-bootstrap";
+import {Row, Col, Card, Form, Button, Image, Spinner} from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import React, {useEffect, useState} from "react";
 import { useAuth } from 'components/auth.tsx';
@@ -192,7 +192,7 @@ const SignUp = () => {
                     <div>
                       <div className="d-grid">
                         <Button variant="primary" type="submit" disabled={loading}>
-                          {loading ? "Criando..." : "Criar Conta"}
+                          {loading ? <Spinner animation="border" size="sm" /> : "Criar Conta"}
                         </Button>
                       </div>
                       <div className="d-md-flex justify-content-between mt-4">

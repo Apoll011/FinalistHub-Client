@@ -5,8 +5,6 @@ import { TopRevenueSourcesChart } from "components";
 import {CapacityAnalysisEvent, CapacityAnalysisResponse, EventsApi, FinanceApi } from "api";
 import {ErrorState} from "components/api_component.tsx";
 import {CurrencyDollar} from "react-bootstrap-icons";
-import {DailyRevenueGraph} from "components/financial/DailyRevenue.tsx";
-import {TransactionsList} from "components/financial/TransactionList.tsx";
 import {EventSummary} from "components/event/EventSummary.tsx";
 import {EventCalendar} from "components/event/EventCalendar.tsx";
 import {ArrowDownCircle, ArrowUpCircle, Percent} from "react-feather";
@@ -14,6 +12,8 @@ import Swal from 'sweetalert2';
 import {ProjectsStatsProps} from "types.ts";
 import {useAuth} from "components/auth.tsx";
 import ShowIfAdmin from "components/show_if_admin.tsx";
+import TransactionForm from "components/financial/TransactionForm.tsx";
+import TransferForm from "components/financial/TransferForm.tsx";
 
 const CapacityAnalysis: React.FC<{ capacityAnalysis: CapacityAnalysisEvent[] }> = ({ capacityAnalysis }) => {
     return (
@@ -59,6 +59,7 @@ const Dashboard = () => {
 
     const [showAddRevenueModal, setShowAddRevenueModal] = useState(false);
     const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
+    const [showTransferModal, setShowTransferModal] = useState(false);
 
     const [balanceData, setBalanceData] = useState({ currentBalance: 0, lastUpdated: new Date() });
     const [eventToHappen, setEventToHappen] = useState<CapacityAnalysisResponse>({capacityAnalysis: []});
@@ -77,7 +78,7 @@ const Dashboard = () => {
     };
 
     const refreshData = async () => {
-        const balanceResponse = await new FinanceApi().getBalanceFinanceBalanceGet();
+        const balanceResponse = await new FinanceApi().getTotalBalanceFinanceBalanceGet();
         const profitResponse = await new FinanceApi().getProfitReportFinanceProfitGet();
         const eventResponse = await new EventsApi().getCapacityAnalysisEventsCapacityAnalysisGet();
 
@@ -96,39 +97,64 @@ const Dashboard = () => {
         setEventToHappen(eventResponse);
     };
 
-    const handleAddRevenueSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const target = e.target as HTMLFormElement;
-        const formData = {
-            description: target.description.value,
-            amount: target.amount.value,
-        };
-        await new FinanceApi().addRevenueFinanceRevenuePost(formData);
-        setShowAddRevenueModal(false);
-        await Swal.fire({
-            title: 'Receita adicionada com Sucesso!',
-            icon: 'success',
-            confirmButtonText: 'OK'
-        });
-        await refreshData();
+    const handleAddRevenueSubmit = async (formData: any) => {
+        try {
+            await new FinanceApi().createTransactionFinanceTransactionsPost({transactionCreate: formData});
+            setShowAddRevenueModal(false);
+            await Swal.fire({
+                title: 'Revenue added successfully!',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
+            await refreshData();
+        } catch (error) {
+            await Swal.fire({
+                title: 'Error adding revenue' + error,
+                text: 'Please try again',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+    };
+    const handleTransferSubmit = async (formData: any) => {
+        try {
+            await new FinanceApi().createTransactionFinanceTransactionsPost({transactionCreate: formData});
+            setShowTransferModal(false);
+            await Swal.fire({
+                title: 'Tranferencia feita com sucesso!',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
+            await refreshData();
+        } catch (error) {
+            await Swal.fire({
+                title: 'Erro tranferindo o dinheiro!',
+                text: 'Please try again',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+    };
+    const handleAddExpenseSubmit = async (formData: any) => {
+        try {
+            await new FinanceApi().createTransactionFinanceTransactionsPost({transactionCreate: formData});
+            setShowAddExpenseModal(false);
+            await Swal.fire({
+                title: 'Expense added successfully!',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
+            await refreshData();
+        } catch (error) {
+            await Swal.fire({
+                title: 'Error adding expense',
+                text: 'Please try again',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
     };
 
-    const handleAddExpenseSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const target = e.target as HTMLFormElement;
-        const formData = {
-            description: target.description.value,
-            amount: target.amount.value,
-        };
-        await new FinanceApi().addExpensesFinanceExpensesPost(formData);
-        setShowAddExpenseModal(false);
-        await Swal.fire({
-            title: 'Despesa adicionada com Sucesso!',
-            icon: 'success',
-            confirmButtonText: 'OK'
-        });
-        await refreshData(); // Atualiza os dados após o submit
-    };
 
     useEffect(() => {
         refreshData().then(() => console.log("Dados refrescados"));
@@ -189,8 +215,11 @@ const Dashboard = () => {
                                 <Button variant="primary" className="bg-success mx-3" onClick={() => setShowAddRevenueModal(isAdmin)}>
                                     Adicionar Receita
                                 </Button>
-                                <Button variant="primary" className="bg-warning" onClick={() => setShowAddExpenseModal(isAdmin)}>
+                                <Button variant="primary" className="bg-warning mx-3" onClick={() => setShowAddExpenseModal(isAdmin)}>
                                     Adicionar Despesa
+                                </Button>
+                                <Button variant="primary" className="bg-info" onClick={() => setShowTransferModal(isAdmin)}>
+                                    Transferir Dinheiro
                                 </Button>
                             </Col>
                         </ShowIfAdmin>
@@ -222,90 +251,31 @@ const Dashboard = () => {
 
                 <ShowIfAdmin>
                     <Row className="my-6">
-                        <DailyRevenueGraph />
-                    </Row>
-
-
-                    <Row className="my-6">
                         <Col xl={4} lg={12} md={12} xs={12} className="mb-6 mb-xl-0">
                             <TopRevenueSourcesChart />
                         </Col>
                         <Col xl={8} lg={12} md={12} xs={12}>
-                            <TransactionsList />
+
                         </Col>
                     </Row>
-                    <Modal show={showAddRevenueModal} onHide={() => setShowAddRevenueModal(false)}>
-                        <Modal.Header closeButton>
-                            <Modal.Title>Adicionar Receita</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>
-                            <Form onSubmit={handleAddRevenueSubmit}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Descrição da Receita</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        name="description"
-                                        placeholder="Descrição"
-                                        required
-                                    />
-                                </Form.Group>
+                    <TransactionForm
+                        show={showAddRevenueModal}
+                        onHide={() => setShowAddRevenueModal(false)}
+                        onSubmit={handleAddRevenueSubmit}
+                        transactionType="revenue"
+                    />
 
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Valor</Form.Label>
-                                    <Form.Control
-                                        type="number"
-                                        name="amount"
-                                        required
-                                    />
-                                </Form.Group>
-
-                                <div className="d-flex justify-content-end gap-2">
-                                    <Button variant="secondary" onClick={() => setShowAddRevenueModal(false)}>
-                                        Cancelar
-                                    </Button>
-                                    <Button variant="primary" type="submit">
-                                        Adicionar
-                                    </Button>
-                                </div>
-                            </Form>
-                        </Modal.Body>
-                    </Modal>
-                    <Modal show={showAddExpenseModal} onHide={() => setShowAddExpenseModal(false)}>
-                        <Modal.Header closeButton>
-                            <Modal.Title>Adicionar Despesa</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>
-                            <Form onSubmit={handleAddExpenseSubmit}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Descrição da Despesa</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        name="description"
-                                        placeholder="Descrição"
-                                        required
-                                    />
-                                </Form.Group>
-
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Valor</Form.Label>
-                                    <Form.Control
-                                        type="number"
-                                        name="amount"
-                                        required
-                                    />
-                                </Form.Group>
-
-                                <div className="d-flex justify-content-end gap-2">
-                                    <Button variant="secondary" onClick={() => setShowAddExpenseModal(false)}>
-                                        Cancelar
-                                    </Button>
-                                    <Button variant="primary" type="submit">
-                                        Adicionar
-                                    </Button>
-                                </div>
-                            </Form>
-                        </Modal.Body>
-                    </Modal>
+                    <TransactionForm
+                        show={showAddExpenseModal}
+                        onHide={() => setShowAddExpenseModal(false)}
+                        onSubmit={handleAddExpenseSubmit}
+                        transactionType="expense"
+                    />
+                    <TransferForm
+                        show={showTransferModal}
+                        onHide={() => setShowTransferModal(false)}
+                        onSubmit={handleTransferSubmit}
+                    />
                 </ShowIfAdmin>
             </Container>
         </Fragment>

@@ -28,7 +28,7 @@ const TopRevenueSourcesChart = () => {
   const sources = data.sources;
 
   const topRevenueChartSeries = sources.map((source: { totalAmount: number; }) => source.totalAmount);
-  const topRevenueChartLabels = sources.map((source: { description: string; }) => source.description);
+  const topRevenueChartLabels = sources.map((source: { category: string; }) => source.category);
 
   const performanceChartOptions: ApexOptions = {
     dataLabels: { enabled: false },
@@ -87,10 +87,10 @@ const TopRevenueSourcesChart = () => {
         />
       </div>
       <div className="align-items-center justify-content-around">
-        {sources.map((source, index) => <div key={source.description}>
-              <h3 className="mt-3 mb-1 fw-bold"><i className={`fe fe-dollar-sign text-${getSourceColor(index)} fs-3`}></i> {formatCurrency(source.totalAmount)}
+        {sources.map((source, index) => <div key={source.category}>
+              <h3 className="mt-3 mb-1 fw-bold"><i className={`fe fe-dollar-sign text-${getSourceColor(index)} fs-3`}></i> {formatCurrency(source.totalAmount)} ({source.transactionCount})
               </h3>
-          <small>{source.description}</small>
+          <small>{source.category}</small>
         </div>)}
       </div>
     </Card.Body>

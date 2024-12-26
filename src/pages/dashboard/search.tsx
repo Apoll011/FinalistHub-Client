@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Card, Col, Container, Form, Row} from 'react-bootstrap';
+import {Button, Card, Col, Container, Form, Row, Spinner} from 'react-bootstrap';
 import {Event, EventsApi, EventStatus, SearchEventsEventsSearchGetRequest, SearchEventsResponse} from 'api';
 import {ListEvents} from "components/event/ListEvents.tsx";
 
@@ -129,7 +129,7 @@ const SearchEventsPage = () => {
                                             onClick={handleSearch}
                                             disabled={loading}
                                         >
-                                            {loading ? 'Pesquisando...' : 'Pesquisar'}
+                                            {loading ? <Spinner animation="border" size="sm" /> : 'Pesquisar'}
                                         </Button>
                                     </Col>
                                 </Row>
@@ -144,7 +144,7 @@ const SearchEventsPage = () => {
                     <Col>
                         <Card>
                             <Card.Body className="text-center">
-                                {loading ? 'Carregando...' : 'Nenhum evento encontrado'}
+                                {loading ? <Spinner animation="border" size="sm" /> : 'Nenhum evento encontrado'}
                             </Card.Body>
                         </Card>
                     </Col>

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import {BASE_PATH} from "api";
 
 interface User {
     id: string;
@@ -26,7 +27,7 @@ interface AuthProviderProps {
     children: ReactNode;
 }
 
-const API_BASE_URL = 'https://finalisthub-server.onrender.com';
+const API_BASE_URL = BASE_PATH;
 const PROTECTED_USERNAME = 'apoll011';
 
 const ENDPOINTS = {

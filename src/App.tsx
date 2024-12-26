@@ -10,6 +10,12 @@ import TicketSalesPage from "pages/dashboard/tickets.tsx";
 import SearchEventsPage from "pages/dashboard/search.tsx";
 import {AuthProvider, useAuth} from "components/auth.tsx";
 import ProfileManagement from "pages/dashboard/profile.tsx";
+import CategoriesPage from "pages/dashboard/finance/categories.tsx";
+import TransferHistory from "pages/dashboard/finance/transferHistory.tsx";
+import CashflowForecastPage from "pages/dashboard/finance/CashflowForecastPage.tsx";
+import TransactionsPage from "pages/dashboard/finance/TransactionsPage.tsx";
+import CategorySpendingAnalysisComponent from "components/financial/CategorySpendingAnalysis.tsx";
+import AccountsPage from "pages/dashboard/finance/AccountsPage.tsx";
 
 const AuthenticationLayout = React.lazy(() => import("layouts/AuthenticationLayout"));
 const RootLayout = React.lazy(() => import("layouts/RootLayout"));
@@ -103,6 +109,42 @@ const App = () => {
                   </AdminRoute>
               ),
             }
+          ],
+        },
+        {
+          id: "finance",
+          path: "/finance",
+          children: [
+            {
+              id: "finance-list",
+              path: "/finance/transation/list",
+              Component: TransactionsPage,
+            },
+            {
+              id: "l-transfer",
+              path: "/finance/transation/list/transfer",
+              Component: TransferHistory,
+            },
+            {
+              id: "l-accounts",
+              path: "/finance/accounts/list/",
+              Component: AccountsPage,
+            },
+            {
+              id: "s-analysis",
+              path: "/finance/analysis/spending",
+              Component: CategorySpendingAnalysisComponent,
+            },
+            {
+              id: "cash-flow",
+              path: "/finance/cashflow",
+              Component: CashflowForecastPage,
+            },
+            {
+              id: "f-categories",
+              path: "/finance/categories",
+              Component: CategoriesPage,
+            },
           ],
         },
         {
