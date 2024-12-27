@@ -1,6 +1,6 @@
 import { DashboardMenuProps } from "types.ts";
 import { v4 as uuid } from "uuid";
-import TransferHistory from "pages/dashboard/finance/transferHistory.tsx";
+import TransferHistory from "pages/dashboard/finance/TransferHistoryPage.tsx";
 
 export const DashboardMenu: DashboardMenuProps[] = [
   {

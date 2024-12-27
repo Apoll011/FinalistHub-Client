@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 import { Image } from "react-bootstrap";
-import {getStatusBadge} from "pages/dashboard/events.tsx";
+import {getStatusBadge} from "pages/dashboard/events/EventsPage.tsx";
 
 interface TicketSale {
     type: string;

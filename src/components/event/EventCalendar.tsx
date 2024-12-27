@@ -1,4 +1,4 @@
-import {ErrorState, LoadingState, useApiData} from "components/api_component.tsx";
+import {ErrorState, LoadingState, useApiData} from "hooks/useApiData.tsx";
 import {EventsApi, Event} from "api";
 // @ts-ignore
 import React, {useState} from "react";
@@ -6,7 +6,7 @@ import {Card, Col, Row} from "react-bootstrap";
 import {Calendar} from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import {useNavigate} from "react-router-dom";
-import {getStatusBadge} from "pages/dashboard/events.tsx";
+import {getStatusBadge} from "pages/dashboard/events/EventsPage.tsx";
 
 
 export const EventCalendar = () => {

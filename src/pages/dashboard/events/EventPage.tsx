@@ -8,7 +8,7 @@ import {
     Item,
     ItemCreate, ObservationInput, DateInput
 } from 'api';
-import {getStatusBadge} from "pages/dashboard/events.tsx";
+import {getStatusBadge} from "pages/dashboard/events/EventsPage.tsx";
 
 const EditEventPage = () => {
     const [showModal, setShowModal] = useState(false);

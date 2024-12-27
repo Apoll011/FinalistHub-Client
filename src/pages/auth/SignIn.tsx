@@ -1,7 +1,7 @@
 import {Row, Col, Card, Form, Button, Image, Spinner} from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import React, { useState } from "react";
-import { useAuth } from 'components/auth.tsx';
+import { useAuth } from 'hooks/useAuth';
 import { useMounted } from "hooks/useMounted";
 
 const SignIn = () => {

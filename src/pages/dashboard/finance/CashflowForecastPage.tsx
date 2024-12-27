@@ -10,7 +10,8 @@ import {
     Title,
     Tooltip,
     Legend,
-    ChartData
+    ChartData,
+    ChartOptions
 } from 'chart.js';
 import {CashflowForecast, FinanceApi} from "api";
 
@@ -25,7 +26,6 @@ ChartJS.register(
 );
 
 const apiFunctions = {
-    // To be filled in
     getForecastCashflow: async (days?: number) => await new FinanceApi().forecastCashflowFinanceCashflowForecastGet({ days })
 };
 
@@ -41,7 +41,7 @@ const CashflowForecastPage = () => {
             setError(null);
             const response = await apiFunctions.getForecastCashflow(days);
             setForecastData(response);
-        } catch (err) {
+        } catch {
             setError('Failed to fetch forecast data');
         } finally {
             setLoading(false);
@@ -59,44 +59,44 @@ const CashflowForecastPage = () => {
         }).format(value);
     };
 
-    const chartData: ChartData<"line", number[], any> | null = forecastData ? {
-        labels: forecastData.dailyForecasts.map(f => new Date(f.date).toISOString()),
+    const chartData: ChartData<"line", number[], string> | null = forecastData ? {
+        labels: forecastData.dailyForecasts.map(f => new Date(f.date).toISOString().split('T')[0]),
         datasets: [
             {
-                label: 'Projected Balance',
+                label: 'Saldo Projetado',
                 data: forecastData.dailyForecasts.map(f => f.projectedBalance),
                 borderColor: 'rgb(75, 192, 192)',
                 tension: 0.1
             },
             {
-                label: 'Projected Revenue',
+                label: 'Receita Projetada',
                 data: forecastData.dailyForecasts.map(f => f.projectedRevenue),
                 borderColor: 'rgb(54, 162, 235)',
                 tension: 0.1
             },
             {
-                label: 'Projected Expenses',
+                label: 'Despesas Projetadas',
                 data: forecastData.dailyForecasts.map(f => f.projectedExpenses),
                 borderColor: 'rgb(255, 99, 132)',
                 tension: 0.1
             }
         ]
-    } as ChartData<"line", number[], any> : null;
+    } as ChartData<"line", number[], string> : null;
 
-    const chartOptions = {
+    const chartOptions: ChartOptions<'line'> = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                position: 'top',
+                position: 'top' as const,
             },
             title: {
                 display: true,
-                text: 'Cashflow Forecast'
+                text: 'Previsão de Fluxo de Caixa'
             },
             tooltip: {
                 callbacks: {
-                    label: function(context: { dataset: { label: string; }; parsed: { y: number | null; }; }) {
+                    label: function(context) {
                         let label = context.dataset.label || '';
                         if (label) {
                             label += ': ';
@@ -112,8 +112,8 @@ const CashflowForecastPage = () => {
         scales: {
             y: {
                 ticks: {
-                    callback: function(value: number) {
-                        return formatCurrency(value);
+                    callback: function(value) {
+                        return formatCurrency(value as number);
                     }
                 }
             }
@@ -124,13 +124,13 @@ const CashflowForecastPage = () => {
         <Container fluid className="p-4">
             <Row className="mb-4">
                 <Col>
-                    <h1 className="mb-4">Cashflow Forecast</h1>
+                    <h1 className="mb-4">Previsão de Fluxo de Caixa</h1>
                     <Card>
                         <Card.Body>
                             <Row className="align-items-center">
                                 <Col md={6}>
                                     <Form.Group>
-                                        <Form.Label>Forecast Period (Days)</Form.Label>
+                                        <Form.Label>Período de Previsão (Dias)</Form.Label>
                                         <Form.Control
                                             type="number"
                                             value={days}
@@ -155,10 +155,10 @@ const CashflowForecastPage = () => {
                                                     role="status"
                                                     className="me-2"
                                                 />
-                                                Loading...
+                                                Carregando...
                                             </>
                                         ) : (
-                                            'Update Forecast'
+                                            'Atualizar Previsão'
                                         )}
                                     </Button>
                                 </Col>
@@ -182,7 +182,7 @@ const CashflowForecastPage = () => {
                         <Col md={4}>
                             <Card>
                                 <Card.Body>
-                                    <Card.Title>Starting Balance</Card.Title>
+                                    <Card.Title>Saldo Inicial</Card.Title>
                                     <h3 className="text-primary">
                                         {formatCurrency(forecastData.startingBalance)}
                                     </h3>
@@ -192,7 +192,7 @@ const CashflowForecastPage = () => {
                         <Col md={4}>
                             <Card>
                                 <Card.Body>
-                                    <Card.Title>Forecast Period</Card.Title>
+                                    <Card.Title>Período de Previsão</Card.Title>
                                     <h3 className="text-primary">
                                         {forecastData.forecastPeriodDays} Days
                                     </h3>
@@ -202,7 +202,7 @@ const CashflowForecastPage = () => {
                         <Col md={4}>
                             <Card>
                                 <Card.Body>
-                                    <Card.Title>Projected Final Balance</Card.Title>
+                                    <Card.Title>Saldo Final Projetado</Card.Title>
                                     <h3 className="text-primary">
                                         {formatCurrency(
                                             forecastData.dailyForecasts[
@@ -220,7 +220,7 @@ const CashflowForecastPage = () => {
                             <Card>
                                 <Card.Body>
                                     <div style={{ height: '400px' }}>
-                                        <Line data={chartData as ChartData<"line", number[], any>} options={chartOptions} />
+                                        <Line data={chartData as ChartData<"line", number[], string>} options={chartOptions} />
                                     </div>
                                 </Card.Body>
                             </Card>
@@ -231,21 +231,21 @@ const CashflowForecastPage = () => {
                         <Col>
                             <Card>
                                 <Card.Body>
-                                    <Card.Title>Daily Forecast Details</Card.Title>
+                                    <Card.Title>Detalhes da Previsão Diário</Card.Title>
                                     <div className="table-responsive">
                                         <table className="table table-striped">
                                             <thead>
                                             <tr>
-                                                <th>Date</th>
-                                                <th>Projected Revenue</th>
-                                                <th>Projected Expenses</th>
-                                                <th>Projected Balance</th>
+                                                <th>Data</th>
+                                                <th>Despesa Projetada</th>
+                                                <th>Gastos Projetados</th>
+                                                <th>Saldo Projetado</th>
                                             </tr>
                                             </thead>
                                             <tbody>
                                             {forecastData.dailyForecasts.map((forecast) => (
-                                                <tr key={forecast.date.toString()}>
-                                                    <td>{new Date(forecast.date).toISOString()}</td>
+                                                <tr key={forecast.date.toISOString()}>
+                                                    <td>{new Date(forecast.date).toISOString().split('T')[0]}</td>
                                                     <td>{formatCurrency(forecast.projectedRevenue)}</td>
                                                     <td>{formatCurrency(forecast.projectedExpenses)}</td>
                                                     <td>{formatCurrency(forecast.projectedBalance)}</td>

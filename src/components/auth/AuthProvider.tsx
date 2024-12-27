@@ -1,27 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { useState, useEffect, ReactNode } from 'react';
 import {BASE_PATH} from "api";
-
-interface User {
-    id: string;
-    username: string;
-    role: string;
-    token: string;
-}
-
-interface AuthContextType {
-    user: User | null;
-    loading: boolean;
-    register: (username: string, password: string, role?: string) => Promise<void>;
-    login: (username: string, password: string) => Promise<void>;
-    logout: () => void;
-    getUsers: () => Promise<User[]>;
-    changeUserRole: (username: string, newRole: string) => Promise<void>;
-    changePassword: (newPassword: string) => Promise<void>;
-    deleteUser: (username: string) => Promise<void>;
-    isAdmin: boolean;
-}
-
-const AuthContext = createContext<AuthContextType | null>(null);
+import { AuthContext, User } from 'hooks/useAuth.tsx';
 
 interface AuthProviderProps {
     children: ReactNode;
@@ -278,12 +257,4 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             {children}
         </AuthContext.Provider>
     );
-};
-
-export const useAuth = (): AuthContextType => {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
-    return context;
 };

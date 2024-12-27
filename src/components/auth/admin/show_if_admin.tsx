@@ -1,5 +1,5 @@
 import React from "react";
-import { useAuth } from "components/auth.tsx";
+import { useAuth } from 'hooks/useAuth.tsx';
 
 interface ShowIfAdminProps {
     children: React.ReactNode;

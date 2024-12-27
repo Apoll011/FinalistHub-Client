@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Button, Modal, Badge, Form } from 'react-bootstrap';
 import {EventsApi, Event } from "api";
 import {ListEvents} from "components/event/ListEvents.tsx";
-import {useAuth} from "components/auth.tsx";
-import ShowIfAdmin from "components/show_if_admin.tsx";
+import {useAuth} from "hooks/useAuth";
+import ShowIfAdmin from "components/auth/admin/show_if_admin.tsx";
 
 
 const EventsPage = () => {

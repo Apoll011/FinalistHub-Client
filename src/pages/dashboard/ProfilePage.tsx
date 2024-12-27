@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from 'components/auth.tsx';
+import { useAuth } from 'hooks/useAuth';
 import { Container, Row, Col, Card, Form, Button, Alert, ListGroup } from 'react-bootstrap';
-import ShowIfAdmin from "components/show_if_admin.tsx";
+import ShowIfAdmin from "components/auth/admin/show_if_admin.tsx";
 
 interface User {
     id: string;

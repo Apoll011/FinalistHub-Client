@@ -1,11 +1,11 @@
 import React, {useState} from "react";
 import {Event, EventDetailsResponse, EventsApi} from "api";
 import {useNavigate} from "react-router-dom";
-import {generatePDF} from "components/PDFReport.tsx";
+import {generatePDF} from "components/pdf/PDFReport.tsx";
 import {Button, Card, Col, Modal, Row, Table} from "react-bootstrap";
-import {getStatusBadge} from "pages/dashboard/events.tsx";
-import ShowIfAdmin from "components/show_if_admin.tsx";
-import AdminOnly from "components/admin_only.tsx";
+import {getStatusBadge} from "pages/dashboard/events/EventsPage.tsx";
+import ShowIfAdmin from "components/auth/admin/show_if_admin.tsx";
+import AdminOnly from "components/auth/admin/admin_only.tsx";
 
 export const ListEvents: React.FC<{events: Event[]}> = ({events}) => {
     const [selectedEvent, setSelectedEvent] = useState<EventDetailsResponse | null>(null);

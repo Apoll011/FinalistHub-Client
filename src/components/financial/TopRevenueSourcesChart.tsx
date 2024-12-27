@@ -5,7 +5,7 @@ import Chart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 
 import {FinanceApi} from "api";
-import {ErrorState, LoadingState, useApiData} from "components/api_component.tsx";
+import {ErrorState, LoadingState, useApiData} from "hooks/useApiData.tsx";
 
 
 const TopRevenueSourcesChart = () => {

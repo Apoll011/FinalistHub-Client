@@ -28,7 +28,7 @@ const AccountsPage = () => {
 
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [createLoading, setCreateLoading] = useState(false);
-    const [newAccount, setNewAccount] = useState({
+    const [newAccount, setNewAccount] = useState<AccountCreate>({
         name: '',
         type: 'bank',
         description: ''
@@ -41,7 +41,7 @@ const AccountsPage = () => {
             setError(null);
             const response = await apiFunctions.getAccounts();
             setAccounts(response);
-        } catch (err) {
+        } catch {
             setError('Failed to fetch accounts');
         } finally {
             setLoading(false);
@@ -49,6 +49,9 @@ const AccountsPage = () => {
     };
 
     const fetchStatement = async () => {
+        if (!selectedAccount) {
+            return
+        }
         try {
             setLoadingStatement(true);
             const response = await apiFunctions.getAccountStatement(
@@ -57,7 +60,7 @@ const AccountsPage = () => {
                 endDate
             );
             setStatementData(response);
-        } catch (err) {
+        } catch {
             setError('Failed to fetch account statement');
         } finally {
             setLoadingStatement(false);
@@ -75,7 +78,7 @@ const AccountsPage = () => {
         }).format(value);
     };
 
-    const getAccountIcon = (type) => {
+    const getAccountIcon = (type: string) => {
         switch (type.toLowerCase()) {
             case 'bank':
                 return <Bank className="text-primary" size={24} />;
@@ -92,15 +95,15 @@ const AccountsPage = () => {
         setStatementData(null);
     };
 
-    const handleCreateAccount = async (e) => {
+    const handleCreateAccount = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
             setCreateLoading(true);
-            await apiFunctions.createAccount(newAccount);
+            await apiFunctions.createAccount(newAccount as AccountCreate);
             setShowCreateModal(false);
             setNewAccount({ name: '', type: 'bank', description: '' });
-            fetchAccounts(); // Refresh the accounts list
-        } catch (err) {
+            fetchAccounts();
+        } catch {
             setError('Failed to create account');
         } finally {
             setCreateLoading(false);
@@ -112,8 +115,7 @@ const AccountsPage = () => {
             <Row className="mb-4">
                 <Col xs={12} className="d-flex justify-content-between align-items-center">
                     <div>
-                        <h1 className="display-4 mb-0">Financial Accounts</h1>
-                        <p className="text-muted">Manage and track your accounts</p>
+                        <h1 className="display-4 mb-0">Contas</h1>
                     </div>
                     <Button
                         variant="primary"
@@ -121,7 +123,7 @@ const AccountsPage = () => {
                         onClick={() => setShowCreateModal(true)}
                     >
                         <PlusCircle size={20} className="me-2" />
-                        New Account
+                        Nova Conta
                     </Button>
                 </Col>
             </Row>
@@ -164,7 +166,7 @@ const AccountsPage = () => {
                                             {formatCurrency(account.currentBalance)}
                                         </h2>
                                         <small className="text-muted">
-                                            Current Balance
+                                            Saldo Atual
                                         </small>
                                     </div>
                                 </Card.Body>
@@ -183,7 +185,7 @@ const AccountsPage = () => {
                     <Modal.Title>
                         <div className="d-flex align-items-center">
                             {selectedAccount && getAccountIcon(selectedAccount.type)}
-                            <span className="ms-2">{selectedAccount?.name} Statement</span>
+                            <span className="ms-2">Extrato de {selectedAccount?.name}</span>
                         </div>
                     </Modal.Title>
                 </Modal.Header>
@@ -191,30 +193,30 @@ const AccountsPage = () => {
                     <Row className="mb-4">
                         <Col md={5}>
                             <Form.Group>
-                                <Form.Label>Start Date</Form.Label>
+                                <Form.Label>Data de Início</Form.Label>
                                 <div className="input-group">
                                     <span className="input-group-text">
                                         <Calendar size={18} />
                                     </span>
                                     <Form.Control
                                         type="date"
-                                        value={startDate}
-                                        onChange={(e) => setStartDate(e.target.value)}
+                                        value={startDate.toISOString().split('T')[0]}
+                                        onChange={(e) => setStartDate(new Date(e.target.value))}
                                     />
                                 </div>
                             </Form.Group>
                         </Col>
                         <Col md={5}>
                             <Form.Group>
-                                <Form.Label>End Date</Form.Label>
+                                <Form.Label>Data Final</Form.Label>
                                 <div className="input-group">
                                     <span className="input-group-text">
                                         <Calendar size={18} />
                                     </span>
                                     <Form.Control
                                         type="date"
-                                        value={endDate}
-                                        onChange={(e) => setEndDate(e.target.value)}
+                                        value={endDate.toISOString().split('T')[0]}
+                                        onChange={(e) => setEndDate(new Date(e.target.value))}
                                     />
                                 </div>
                             </Form.Group>
@@ -229,7 +231,7 @@ const AccountsPage = () => {
                                 {loadingStatement ? (
                                     <Spinner animation="border" size="sm" />
                                 ) : (
-                                    'Get Statement'
+                                    'Obter Extrato'
                                 )}
                             </Button>
                         </Col>
@@ -241,7 +243,7 @@ const AccountsPage = () => {
                                 <Col md={4}>
                                     <Card className="bg-light">
                                         <Card.Body className="text-center">
-                                            <Card.Title>Opening Balance</Card.Title>
+                                            <Card.Title>Saldo de Abertura</Card.Title>
                                             <h4>{formatCurrency(statementData.openingBalance)}</h4>
                                         </Card.Body>
                                     </Card>
@@ -249,7 +251,7 @@ const AccountsPage = () => {
                                 <Col md={4}>
                                     <Card className="bg-light">
                                         <Card.Body className="text-center">
-                                            <Card.Title>Closing Balance</Card.Title>
+                                            <Card.Title>Saldo Final</Card.Title>
                                             <h4>{formatCurrency(statementData.closingBalance)}</h4>
                                         </Card.Body>
                                     </Card>
@@ -257,7 +259,7 @@ const AccountsPage = () => {
                                 <Col md={4}>
                                     <Card className="bg-light">
                                         <Card.Body className="text-center">
-                                            <Card.Title>Net Change</Card.Title>
+                                            <Card.Title>Variação Líquida</Card.Title>
                                             <h4 className={statementData.closingBalance - statementData.openingBalance >= 0 ? 'text-success' : 'text-danger'}>
                                                 {formatCurrency(statementData.closingBalance - statementData.openingBalance)}
                                             </h4>
@@ -277,7 +279,7 @@ const AccountsPage = () => {
                 centered
             >
                 <Modal.Header closeButton className="border-0">
-                    <Modal.Title>Create New Account</Modal.Title>
+                    <Modal.Title>Criar nova Conta</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form onSubmit={handleCreateAccount}>
@@ -285,7 +287,7 @@ const AccountsPage = () => {
                             <Form.Label>Account Name</Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Enter account name"
+                                placeholder="Nome da Conta"
                                 value={newAccount.name}
                                 onChange={(e) => setNewAccount({...newAccount, name: e.target.value})}
                                 required
@@ -293,7 +295,7 @@ const AccountsPage = () => {
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label>Account Type</Form.Label>
+                            <Form.Label>Tipo de Conta</Form.Label>
                             <div className="d-flex gap-3">
                                 <Button
                                     variant={newAccount.type === 'bank' ? 'primary' : 'outline-primary'}
@@ -302,7 +304,7 @@ const AccountsPage = () => {
                                     type="button"
                                 >
                                     <Bank size={24} className="mb-2" />
-                                    <div>Bank Account</div>
+                                    <div>Conta no Banco</div>
                                 </Button>
                                 <Button
                                     variant={newAccount.type === 'cash' ? 'primary' : 'outline-primary'}
@@ -311,7 +313,7 @@ const AccountsPage = () => {
                                     type="button"
                                 >
                                     <Wallet size={24} className="mb-2" />
-                                    <div>Cash Account</div>
+                                    <div>Conta de Caixa</div>
                                 </Button>
                             </div>
                         </Form.Group>
@@ -321,8 +323,8 @@ const AccountsPage = () => {
                             <Form.Control
                                 as="textarea"
                                 rows={3}
-                                placeholder="Enter account description"
-                                value={newAccount.description}
+                                placeholder="DEscrição da Conta"
+                                value={newAccount.description as string}
                                 onChange={(e) => setNewAccount({...newAccount, description: e.target.value})}
                                 required
                             />
@@ -344,17 +346,17 @@ const AccountsPage = () => {
                                             role="status"
                                             className="me-2"
                                         />
-                                        Creating Account...
+                                        Criando Conta...
                                     </>
                                 ) : (
-                                    'Create Account'
+                                    'Criar Conta'
                                 )}
                             </Button>
                         </div>
                     </Form>
                 </Modal.Body>
             </Modal>
-            <style jsx>{`
+            <style>{`
                 .hover-shadow:hover {
                     transform: translateY(-5px);
                     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;

@@ -1,8 +1,8 @@
-import {ErrorState, LoadingState, useApiData} from "components/api_component.tsx";
+import {ErrorState, LoadingState, useApiData} from "hooks/useApiData.tsx";
 import {EventsApi} from "api";
 import {Card} from "react-bootstrap";
 import React from "react";
-import AdminOnly from "components/admin_only.tsx";
+import AdminOnly from "components/auth/admin/admin_only.tsx";
 
 export const EventSummary = () => {
     const { data, loading, error } = useApiData(

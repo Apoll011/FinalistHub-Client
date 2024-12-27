@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button, Row, Col } from 'react-bootstrap';
-import { useAuth } from "components/auth.tsx";
-import { AccountResponse, CategoriesApi, FinanceApi, TransactionCategoryResponse } from "api";
+import { useAuth } from 'hooks/useAuth';
+import {AccountResponse, CategoriesApi, FinanceApi, TransactionCategoryResponse, TransactionCreate} from "api";
 
 const PAYMENT_METHODS = [
     { value: 'cash', label: 'Dinheiro' },
     { value: 'credit_card', label: 'Cartão de Crédito' },
     { value: 'debit_card', label: 'Cartão de Débito' },
     { value: 'bank_transfer', label: 'Transferência Bancária' },
-    { value: 'pix', label: 'PIX' },
     { value: 'other', label: 'Outro' }
 ];
 
@@ -20,7 +19,7 @@ const TransactionForm = ({
                          }: {
     show: boolean;
     onHide: () => void;
-    onSubmit: (data: any) => void;
+    onSubmit: (data: TransactionCreate) => void;
     transactionType: 'revenue' | 'expense';
 }) => {
     const { user } = useAuth();
@@ -67,7 +66,7 @@ const TransactionForm = ({
                 updatedAt: new Date()
             };
 
-            await onSubmit(data);
+            onSubmit(data as TransactionCreate);
         } finally {
             setIsSubmitting(false);
         }

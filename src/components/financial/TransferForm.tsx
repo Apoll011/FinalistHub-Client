@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button, Row, Col } from 'react-bootstrap';
-import { useAuth } from "components/auth.tsx";
+import { useAuth } from 'hooks/useAuth';
 import { AccountResponse, FinanceApi } from "api";
 
 const TransferForm = ({

@@ -5,7 +5,7 @@
 import { Card } from "react-bootstrap";
 import { ProjectsStatsProps } from "types.ts";
 import React from "react";
-import AdminOnly from "components/admin_only.tsx";
+import AdminOnly from "components/auth/admin/admin_only.tsx";
 
 interface StatRightProps {
   info: ProjectsStatsProps;

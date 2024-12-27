@@ -2,7 +2,7 @@
 import { Menu } from "react-feather";
 import {Link, useNavigate} from "react-router-dom";
 import { Navbar } from "react-bootstrap";
-import { useAuth } from "components/auth.tsx";
+import { useAuth } from 'hooks/useAuth';
 import React from "react";
 import {StarFill} from "react-bootstrap-icons";
 

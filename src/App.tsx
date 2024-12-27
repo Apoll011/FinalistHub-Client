@@ -2,20 +2,22 @@
 import React, { Suspense } from "react";
 import {createBrowserRouter, Navigate, RouterProvider} from "react-router-dom";
 import {HashLoader} from "react-spinners";
-import EditEventPage from "pages/dashboard/event.tsx";
-import EventsPage from "pages/dashboard/events.tsx";
-import MeetingManagement from "pages/dashboard/meetings.tsx";
-import SalesDashboard from "pages/dashboard/sale.tsx";
-import TicketSalesPage from "pages/dashboard/tickets.tsx";
-import SearchEventsPage from "pages/dashboard/search.tsx";
-import {AuthProvider, useAuth} from "components/auth.tsx";
-import ProfileManagement from "pages/dashboard/profile.tsx";
-import CategoriesPage from "pages/dashboard/finance/categories.tsx";
-import TransferHistory from "pages/dashboard/finance/transferHistory.tsx";
+import EditEventPage from "pages/dashboard/events/EventPage.tsx";
+import EventsPage from "pages/dashboard/events/EventsPage.tsx";
+import MeetingManagement from "pages/dashboard/MeetingsPage.tsx";
+import SalesDashboard from "pages/dashboard/events/EventSalePage.tsx";
+import TicketSalesPage from "pages/dashboard/events/EventTicketsPage.tsx";
+import SearchEventsPage from "pages/dashboard/events/SearchEventsPage.tsx";
+import {AuthProvider} from "components/auth/AuthProvider.tsx";
+import { useAuth } from 'hooks/useAuth';
+import ProfileManagement from "pages/dashboard/ProfilePage.tsx";
+import CategoriesPage from "pages/dashboard/finance/CategoriesPage.tsx";
+import TransferHistory from "pages/dashboard/finance/TransferHistoryPage.tsx";
 import CashflowForecastPage from "pages/dashboard/finance/CashflowForecastPage.tsx";
 import TransactionsPage from "pages/dashboard/finance/TransactionsPage.tsx";
-import CategorySpendingAnalysisComponent from "components/financial/CategorySpendingAnalysis.tsx";
+import CategorySpendingAnalysisComponent from "pages/dashboard/finance/CategorySpendingAnalysisPage.tsx";
 import AccountsPage from "pages/dashboard/finance/AccountsPage.tsx";
+import TransactionReceiptPage from "pages/dashboard/finance/TransactionReceiptPage.tsx";
 
 const AuthenticationLayout = React.lazy(() => import("layouts/AuthenticationLayout"));
 const RootLayout = React.lazy(() => import("layouts/RootLayout"));
@@ -124,6 +126,11 @@ const App = () => {
               id: "l-transfer",
               path: "/finance/transation/list/transfer",
               Component: TransferHistory,
+            },
+            {
+              id: "transaction",
+              path: "/finance/transactions/:id",
+              Component: TransactionReceiptPage,
             },
             {
               id: "l-accounts",

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Row, Col, Modal, Alert } from 'react-bootstrap';
 
 import {Meeting, MeetingList, MeetingsApi} from "api";
-import ShowIfAdmin from "components/show_if_admin.tsx";
+import ShowIfAdmin from "components/auth/admin/show_if_admin.tsx";
 
 const MeetingApi = {
     createMeeting: (formData: { date: string, time: string, location: string, agenda: string }) =>

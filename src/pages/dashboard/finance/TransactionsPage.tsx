@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Spinner, Nav, Tab } from 'react-bootstrap';
+// @ts-ignore
+import {Container, Row, Col, Card, Spinner, Nav, Tab, SelectCallback} from 'react-bootstrap';
 import { Line } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -9,7 +10,9 @@ import {
     LineElement,
     Title,
     Tooltip,
-    Legend
+    Legend,
+    ChartData,
+    ChartOptions
 } from 'chart.js';
 import {FinanceApi, MonthlyFinancialReport, TransactionResponse, WeeklyFinancialReport} from "api";
 import TransactionsList from "components/financial/TransactionsList.tsx";
@@ -24,6 +27,13 @@ ChartJS.register(
     Legend
 );
 
+interface DailyTotals {
+    [date: string]: {
+        revenue: number;
+        expenses: number;
+    };
+}
+
 const apiFunctions = {
     getMonthlyTransactions: async () => await new FinanceApi().getMonthlyTransactionsFinanceTransactionsMonthlyGet(),
     getWeeklyTransactions: async () => await new FinanceApi().getWeeklyTransactionsFinanceTransactionsWeeklyGet()
@@ -34,7 +44,20 @@ const TransactionsPage = () => {
     const [weeklyData, setWeeklyData] = useState<WeeklyFinancialReport | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [activeView, setActiveView] = useState('weekly');
+    type TabKey = 'weekly' | 'monthly';
+    const [activeView, setActiveView] = useState<TabKey>('weekly');
+
+    const isValidKey = (key: string | null): key is TabKey => {
+        return key === 'weekly' || key === 'monthly';
+    };
+
+    const handleSelect: SelectCallback = (eventKey: string | null) => {
+        if (eventKey && isValidKey(eventKey)) {
+            setActiveView(eventKey);
+        }
+    };
+
+
 
     const fetchData = async () => {
         try {
@@ -47,7 +70,7 @@ const TransactionsPage = () => {
 
             setWeeklyData(weeklyResponse);
             setMonthlyData(monthlyResponse);
-        } catch (err) {
+        } catch {
             setError('Failed to fetch transaction data');
         } finally {
             setLoading(false);
@@ -65,11 +88,13 @@ const TransactionsPage = () => {
         }).format(value);
     };
 
-    const getChartData = (transactions:  TransactionResponse[]) => {
+    type TransactionChartData = ChartData<'line', number[], string>;
+
+    const getChartData = (transactions: TransactionResponse[]): TransactionChartData | null => {
         if (!transactions) return null;
 
-        const dailyTotals = transactions.reduce((acc, transaction) => {
-            const date =  new Date(transaction.createdAt).toISOString();
+        const dailyTotals = transactions.reduce<DailyTotals>((acc, transaction) => {
+            const date: string = new Date(transaction.createdAt).toISOString();
             if (!acc[date]) {
                 acc[date] = { revenue: 0, expenses: 0 };
             }
@@ -81,31 +106,33 @@ const TransactionsPage = () => {
             return acc;
         }, {});
 
-        return {
-            labels: Object.keys(dailyTotals),
+        const chartData: TransactionChartData = {
+            labels: Object.keys(dailyTotals).map(f => new Date(f).toISOString().split('T')[0]),
             datasets: [
                 {
-                    label: 'Revenue',
+                    label: 'Ganhos',
                     data: Object.values(dailyTotals).map(d => d.revenue),
                     borderColor: 'rgb(75, 192, 192)',
                     tension: 0.1
                 },
                 {
-                    label: 'Expenses',
+                    label: 'Gastos',
                     data: Object.values(dailyTotals).map(d => d.expenses),
                     borderColor: 'rgb(255, 99, 132)',
                     tension: 0.1
                 }
             ]
         };
+
+        return chartData;
     };
 
-    const chartOptions = {
+    const chartOptions: ChartOptions<'line'> = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                position: 'top',
+                position: 'top' as const,
             },
             tooltip: {
                 callbacks: {
@@ -119,7 +146,7 @@ const TransactionsPage = () => {
             y: {
                 ticks: {
                     callback: function(value) {
-                        return formatCurrency(value);
+                        return formatCurrency(value as number);
                     }
                 }
             }
@@ -138,15 +165,15 @@ const TransactionsPage = () => {
                 <div className="alert alert-danger">{error}</div>
             ) : (
                 <>
-                    <Tab.Container activeKey={activeView} onSelect={setActiveView}>
+                    <Tab.Container activeKey={activeView} onSelect={handleSelect}>
                         <Row className="mb-4">
                             <Col>
                                 <Nav variant="pills">
                                     <Nav.Item>
-                                        <Nav.Link eventKey="weekly">Weekly Report</Nav.Link>
+                                        <Nav.Link eventKey="weekly">Relatório da Semana</Nav.Link>
                                     </Nav.Item>
                                     <Nav.Item>
-                                        <Nav.Link eventKey="monthly">Monthly Report</Nav.Link>
+                                        <Nav.Link eventKey="monthly">Relatório do Mês</Nav.Link>
                                     </Nav.Item>
                                 </Nav>
                             </Col>
@@ -160,7 +187,7 @@ const TransactionsPage = () => {
                                             <Col md={4}>
                                                 <Card className="text-center">
                                                     <Card.Body>
-                                                        <Card.Title>Total Revenue</Card.Title>
+                                                        <Card.Title>Total Ganho</Card.Title>
                                                         <h3 className="text-success">
                                                             {formatCurrency(weeklyData.totalRevenue)}
                                                         </h3>
@@ -170,7 +197,7 @@ const TransactionsPage = () => {
                                             <Col md={4}>
                                                 <Card className="text-center">
                                                     <Card.Body>
-                                                        <Card.Title>Total Expenses</Card.Title>
+                                                        <Card.Title>Total Gasto</Card.Title>
                                                         <h3 className="text-danger">
                                                             {formatCurrency(weeklyData.totalExpenses)}
                                                         </h3>
@@ -180,7 +207,7 @@ const TransactionsPage = () => {
                                             <Col md={4}>
                                                 <Card className="text-center">
                                                     <Card.Body>
-                                                        <Card.Title>Net Income</Card.Title>
+                                                        <Card.Title>Saldo</Card.Title>
                                                         <h3 className={weeklyData.netIncome >= 0 ? 'text-success' : 'text-danger'}>
                                                             {formatCurrency(weeklyData.netIncome)}
                                                         </h3>
@@ -192,10 +219,9 @@ const TransactionsPage = () => {
                                             <Col>
                                                 <Card>
                                                     <Card.Body>
-                                                        <Card.Title>Weekly Transactions Trend</Card.Title>
+                                                        <Card.Title>Gráfico de Transações</Card.Title>
                                                         <div style={{ height: '300px' }}>
-                                                            <Line data={getChartData(weeklyData.transactions)} options={chartOptions} />
-                                                        </div>
+                                                            <Line data={getChartData(weeklyData.transactions) || { labels: [], datasets: [] }} options={chartOptions} />                                                        </div>
                                                     </Card.Body>
                                                 </Card>
                                             </Col>
@@ -212,7 +238,7 @@ const TransactionsPage = () => {
                                             <Col md={4}>
                                                 <Card className="text-center">
                                                     <Card.Body>
-                                                        <Card.Title>Total Revenue</Card.Title>
+                                                        <Card.Title>Total Ganho</Card.Title>
                                                         <h3 className="text-success">
                                                             {formatCurrency(monthlyData.totalRevenue)}
                                                         </h3>
@@ -222,7 +248,7 @@ const TransactionsPage = () => {
                                             <Col md={4}>
                                                 <Card className="text-center">
                                                     <Card.Body>
-                                                        <Card.Title>Total Expenses</Card.Title>
+                                                        <Card.Title>Total Gasto</Card.Title>
                                                         <h3 className="text-danger">
                                                             {formatCurrency(monthlyData.totalExpenses)}
                                                         </h3>
@@ -232,7 +258,7 @@ const TransactionsPage = () => {
                                             <Col md={4}>
                                                 <Card className="text-center">
                                                     <Card.Body>
-                                                        <Card.Title>Net Income</Card.Title>
+                                                        <Card.Title>Saldo</Card.Title>
                                                         <h3 className={monthlyData.netIncome >= 0 ? 'text-success' : 'text-danger'}>
                                                             {formatCurrency(monthlyData.netIncome)}
                                                         </h3>
@@ -244,10 +270,9 @@ const TransactionsPage = () => {
                                             <Col>
                                                 <Card>
                                                     <Card.Body>
-                                                        <Card.Title>Monthly Transactions Trend</Card.Title>
+                                                        <Card.Title>Gráfico de Transações</Card.Title>
                                                         <div style={{ height: '300px' }}>
-                                                            <Line data={getChartData(monthlyData.transactions)} options={chartOptions} />
-                                                        </div>
+                                                            <Line data={getChartData(monthlyData.transactions) || { labels: [], datasets: [] }} options={chartOptions} />                                                        </div>
                                                     </Card.Body>
                                                 </Card>
                                             </Col>

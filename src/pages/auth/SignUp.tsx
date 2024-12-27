@@ -1,7 +1,7 @@
 import {Row, Col, Card, Form, Button, Image, Spinner} from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import React, {useEffect, useState} from "react";
-import { useAuth } from 'components/auth.tsx';
+import { useAuth } from 'hooks/useAuth';
 import { useMounted } from "hooks/useMounted";
 import { Modal } from 'react-bootstrap';
 import {EventsApi} from "api";
