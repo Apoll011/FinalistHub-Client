@@ -102,6 +102,10 @@ export interface GetTopRevenueSourcesFinanceTopRevenueSourcesGetRequest {
     endDate?: string | null;
 }
 
+export interface GetTransactionFinanceTransactionsGetRequest {
+    transactionId: string;
+}
+
 export interface GetTransferHistoryFinanceAccountsTransferHistoryGetRequest {
     startDate?: Date | null;
     endDate?: Date | null;
@@ -225,7 +229,7 @@ export class FinanceApi extends runtime.BaseAPI {
     }
 
     /**
-     * Generate cashflow forecast based on historical patterns
+     * Generate cashflow forecast based on historical patterns using simple ML techniques
      * Forecast Cashflow
      */
     async forecastCashflowFinanceCashflowForecastGetRaw(requestParameters: ForecastCashflowFinanceCashflowForecastGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CashflowForecast>> {
@@ -248,7 +252,7 @@ export class FinanceApi extends runtime.BaseAPI {
     }
 
     /**
-     * Generate cashflow forecast based on historical patterns
+     * Generate cashflow forecast based on historical patterns using simple ML techniques
      * Forecast Cashflow
      */
     async forecastCashflowFinanceCashflowForecastGet(requestParameters: ForecastCashflowFinanceCashflowForecastGetRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CashflowForecast> {
@@ -503,6 +507,43 @@ export class FinanceApi extends runtime.BaseAPI {
      */
     async getTotalBalanceFinanceBalanceGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Balance> {
         const response = await this.getTotalBalanceFinanceBalanceGetRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Get Transaction
+     */
+    async getTransactionFinanceTransactionsGetRaw(requestParameters: GetTransactionFinanceTransactionsGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TransactionResponse>> {
+        if (requestParameters['transactionId'] == null) {
+            throw new runtime.RequiredError(
+                'transactionId',
+                'Required parameter "transactionId" was null or undefined when calling getTransactionFinanceTransactionsGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['transactionId'] != null) {
+            queryParameters['transactionId'] = requestParameters['transactionId'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/finance/transactions`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TransactionResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Get Transaction
+     */
+    async getTransactionFinanceTransactionsGet(requestParameters: GetTransactionFinanceTransactionsGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TransactionResponse> {
+        const response = await this.getTransactionFinanceTransactionsGetRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

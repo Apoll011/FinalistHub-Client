@@ -5,7 +5,9 @@ import {
     Chart as ChartJS,
     ArcElement,
     Tooltip,
-    Legend
+    Legend,
+    ChartData,
+    ChartOptions
 } from 'chart.js';
 import {FinanceApi, CategorySpendingAnalysis} from "api";
 
@@ -24,7 +26,7 @@ const CategorySpendingAnalysisComponent = () => {
     const [startDate, setStartDate] = useState(new Date(new Date().setMonth(new Date().getMonth() - 1)));
     const [endDate, setEndDate] = useState(new Date());
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string | null>(null);
 
     const fetchData = async () => {
         try {
@@ -32,7 +34,7 @@ const CategorySpendingAnalysisComponent = () => {
             setError(null);
             const response = await apiFunctions.getCategorySpending(startDate, endDate);
             setSpendingData(response);
-        } catch (err) {
+        } catch {
             setError('Failed to fetch spending analysis data');
         } finally {
             setLoading(false);
@@ -54,7 +56,7 @@ const CategorySpendingAnalysisComponent = () => {
         return `${value.toFixed(1)}%`;
     };
 
-    const chartData = spendingData ? {
+    const chartData: ChartData<"doughnut", number[], string> | null = spendingData ? {
         labels: spendingData.categories.map(cat => cat.category),
         datasets: [{
             data: spendingData.categories.map(cat => cat.totalAmount),
@@ -69,17 +71,17 @@ const CategorySpendingAnalysisComponent = () => {
                 '#36A2EB'
             ]
         }]
-    } : null;
+    } as ChartData<"doughnut", number[], string> : null;
 
-    const chartOptions = {
+    const chartOptions: ChartOptions<'doughnut'> = {
         plugins: {
             legend: {
                 position: 'right',
             },
             tooltip: {
                 callbacks: {
-                    label: function(context: { raw: any; dataset: { data: any[]; }; }) {
-                        const value = context.raw;
+                    label: function(context) {
+                        const value = context.raw as number;
                         const total = context.dataset.data.reduce((a, b) => a + b, 0);
                         const percentage = ((value / total) * 100).toFixed(1);
                         return `${formatCurrency(value)} (${percentage}%)`;
@@ -93,7 +95,7 @@ const CategorySpendingAnalysisComponent = () => {
         <Container fluid className="p-4">
             <Row className="mb-4">
                 <Col>
-                    <h1>Category Spending Analysis</h1>
+                    <h1>Análise dos Gastos por Categoria</h1>
                 </Col>
             </Row>
 
@@ -104,20 +106,20 @@ const CategorySpendingAnalysisComponent = () => {
                             <Row>
                                 <Col md={4}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Start Date</Form.Label>
+                                        <Form.Label>Data Início</Form.Label>
                                         <Form.Control
                                             type="date"
-                                            value={startDate.toISOString()}
+                                            value={startDate.toISOString().split('T')[0]}
                                             onChange={(e) => setStartDate(new Date(e.target.value))}
                                         />
                                     </Form.Group>
                                 </Col>
                                 <Col md={4}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>End Date</Form.Label>
+                                        <Form.Label>Data Fim</Form.Label>
                                         <Form.Control
                                             type="date"
-                                            value={endDate.toISOString()}
+                                            value={endDate.toISOString().split('T')[0]}
                                             onChange={(e) => setEndDate(new Date(e.target.value))}
                                         />
                                     </Form.Group>
@@ -138,10 +140,10 @@ const CategorySpendingAnalysisComponent = () => {
                                                     role="status"
                                                     className="me-2"
                                                 />
-                                                Loading...
+                                                Carregando...
                                             </>
                                         ) : (
-                                            'Update Analysis'
+                                            'Atualizar Analise.'
                                         )}
                                     </Button>
                                 </Col>
@@ -168,13 +170,13 @@ const CategorySpendingAnalysisComponent = () => {
                                     <Row>
                                         <Col md={8}>
                                             <div style={{ height: '400px' }}>
-                                                <Doughnut data={chartData} options={chartOptions} />
+                                                <Doughnut data={chartData as ChartData<"doughnut", number[], string>} options={chartOptions} />
                                             </div>
                                         </Col>
                                         <Col md={4}>
                                             <Card>
                                                 <Card.Body className="text-center">
-                                                    <Card.Title>Total Spending</Card.Title>
+                                                    <Card.Title>Total Gasto</Card.Title>
                                                     <h2 className="text-primary">
                                                         {formatCurrency(spendingData.totalSpending)}
                                                     </h2>
@@ -191,16 +193,16 @@ const CategorySpendingAnalysisComponent = () => {
                         <Col>
                             <Card>
                                 <Card.Body>
-                                    <Card.Title>Detailed Category Breakdown</Card.Title>
+                                    <Card.Title>Divisão detalhada das Categorias</Card.Title>
                                     <div className="table-responsive">
                                         <table className="table table-striped">
                                             <thead>
                                             <tr>
-                                                <th>Category</th>
-                                                <th>Total Amount</th>
-                                                <th>Average Amount</th>
-                                                <th>Transaction Count</th>
-                                                <th>% of Total</th>
+                                                <th>Categoria</th>
+                                                <th>Total</th>
+                                                <th>Média Gasta</th>
+                                                <th>Quantidade de Transações</th>
+                                                <th>% do Total Gasto</th>
                                             </tr>
                                             </thead>
                                             <tbody>
