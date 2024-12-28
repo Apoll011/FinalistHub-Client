@@ -97,65 +97,6 @@ const Dashboard = () => {
         setEventToHappen(eventResponse);
     };
 
-    const handleAddRevenueSubmit = async (formData: any) => {
-        try {
-            await new FinanceApi().createTransactionFinanceTransactionsPost({transactionCreate: formData});
-            setShowAddRevenueModal(false);
-            await Swal.fire({
-                title: 'Revenue added successfully!',
-                icon: 'success',
-                confirmButtonText: 'OK'
-            });
-            await refreshData();
-        } catch (error) {
-            await Swal.fire({
-                title: 'Error adding revenue' + error,
-                text: 'Please try again',
-                icon: 'error',
-                confirmButtonText: 'OK'
-            });
-        }
-    };
-    const handleTransferSubmit = async (formData: TransactionCreate) => {
-        try {
-            await new FinanceApi().createTransactionFinanceTransactionsPost({transactionCreate: formData});
-            setShowTransferModal(false);
-            await Swal.fire({
-                title: 'Tranferencia feita com sucesso!',
-                icon: 'success',
-                confirmButtonText: 'OK'
-            });
-            await refreshData();
-        } catch (error) {
-            await Swal.fire({
-                title: 'Erro tranferindo o dinheiro!',
-                text: 'Please try again',
-                icon: 'error',
-                confirmButtonText: 'OK'
-            });
-        }
-    };
-    const handleAddExpenseSubmit = async (formData: TransactionCreate) => {
-        try {
-            await new FinanceApi().createTransactionFinanceTransactionsPost({transactionCreate: formData});
-            setShowAddExpenseModal(false);
-            await Swal.fire({
-                title: 'Expense added successfully!',
-                icon: 'success',
-                confirmButtonText: 'OK'
-            });
-            await refreshData();
-        } catch (error) {
-            await Swal.fire({
-                title: 'Error adding expense',
-                text: 'Please try again',
-                icon: 'error',
-                confirmButtonText: 'OK'
-            });
-        }
-    };
-
-
     useEffect(() => {
         refreshData().then(() => console.log("Dados refrescados"));
         const intervalId = setInterval(() => {
@@ -261,20 +202,16 @@ const Dashboard = () => {
                     <TransactionForm
                         show={showAddRevenueModal}
                         onHide={() => setShowAddRevenueModal(false)}
-                        onSubmit={handleAddRevenueSubmit}
                         transactionType="revenue"
                     />
-
                     <TransactionForm
                         show={showAddExpenseModal}
                         onHide={() => setShowAddExpenseModal(false)}
-                        onSubmit={handleAddExpenseSubmit}
                         transactionType="expense"
                     />
                     <TransferForm
                         show={showTransferModal}
                         onHide={() => setShowTransferModal(false)}
-                        onSubmit={handleTransferSubmit}
                     />
                 </ShowIfAdmin>
             </Container>

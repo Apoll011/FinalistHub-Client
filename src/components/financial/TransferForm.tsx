@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button, Row, Col } from 'react-bootstrap';
 import { useAuth } from 'hooks/useAuth';
-import { AccountResponse, FinanceApi } from "api";
+import {AccountResponse, FinanceApi, TransactionCreate} from "api";
+import Swal from "sweetalert2";
 
 const TransferForm = ({
                           show,
                           onHide,
-                          onSubmit,
                       }: {
     show: boolean;
     onHide: () => void;
-    onSubmit: (data: any) => void;
 }) => {
     const { user } = useAuth();
     const [accounts, setAccounts] = useState<AccountResponse[]>([]);
@@ -29,6 +28,25 @@ const TransferForm = ({
             setAccounts(accountsResponse);
         } catch (error) {
             console.error('Error fetching accounts:', error);
+        }
+    };
+
+    const handleTransferSubmit = async (formData: TransactionCreate) => {
+        try {
+            await new FinanceApi().createTransactionFinanceTransactionsPost({transactionCreate: formData});
+            onHide();
+            await Swal.fire({
+                title: 'Tranferencia feita com sucesso!',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
+        } catch {
+            await Swal.fire({
+                title: 'Erro tranferindo o dinheiro!',
+                text: 'Please try again',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
         }
     };
 
@@ -54,9 +72,9 @@ const TransferForm = ({
                 createdAt: new Date(selectedDate),
                 updatedAt: new Date(),
                 type: "transfer"
-            };
+            } as TransactionCreate;
 
-            await onSubmit(data);
+            await handleTransferSubmit(data);
             onHide();
         } finally {
             setIsSubmitting(false);

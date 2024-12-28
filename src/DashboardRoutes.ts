@@ -1,6 +1,5 @@
 import { DashboardMenuProps } from "types.ts";
 import { v4 as uuid } from "uuid";
-import TransferHistory from "pages/dashboard/finance/TransferHistoryPage.tsx";
 
 export const DashboardMenu: DashboardMenuProps[] = [
   {
@@ -23,14 +22,9 @@ export const DashboardMenu: DashboardMenuProps[] = [
   },
   {
     id: uuid(),
-    title: "Reuniões",
-    icon: "users",
-    link: "/meeting/",
-  },
-  {
-    id: uuid(),
     title: 'Finanças',
     icon: 'dollar-sign',
+    admin: true,
     children: [
       { id: uuid(), link: '/finance/categories', name: 'Categorias' },
       {

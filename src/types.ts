@@ -20,6 +20,7 @@ export interface DashboardMenuProps {
   icon?: string;
   badge?: string;
   badgecolor?: string;
+  admin?: boolean;
 }
 
 export interface ProjectsStatsProps {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button, Row, Col } from 'react-bootstrap';
 import { useAuth } from 'hooks/useAuth';
 import {AccountResponse, CategoriesApi, FinanceApi, TransactionCategoryResponse, TransactionCreate} from "api";
+import Swal from "sweetalert2";
 
 const PAYMENT_METHODS = [
     { value: 'cash', label: 'Dinheiro' },
@@ -14,12 +15,10 @@ const PAYMENT_METHODS = [
 const TransactionForm = ({
                              show,
                              onHide,
-                             onSubmit,
                              transactionType
                          }: {
     show: boolean;
     onHide: () => void;
-    onSubmit: (data: TransactionCreate) => void;
     transactionType: 'revenue' | 'expense';
 }) => {
     const { user } = useAuth();
@@ -45,6 +44,44 @@ const TransactionForm = ({
         }
     };
 
+    const handleAddRevenueSubmit = async (formData: TransactionCreate) => {
+        try {
+            await new FinanceApi().createTransactionFinanceTransactionsPost({transactionCreate: formData});
+            onHide();
+            await Swal.fire({
+                title: 'Ganho registrado com sucesso!',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
+        } catch {
+            await Swal.fire({
+                title: 'Erro adicionando ganho!',
+                text: 'Please try again',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+    };
+    const handleAddExpenseSubmit = async (formData: TransactionCreate) => {
+        try {
+            await new FinanceApi().createTransactionFinanceTransactionsPost({transactionCreate: formData});
+            onHide();
+            await Swal.fire({
+                title: 'Gasto adicionado com sucesso!',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
+        } catch {
+            await Swal.fire({
+                title: 'Error adicionando gasto',
+                text: 'Por favor tente novamente',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+    };
+
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -66,7 +103,9 @@ const TransactionForm = ({
                 updatedAt: new Date()
             };
 
-            onSubmit(data as TransactionCreate);
+            const onSubmit = transactionType === "expense" ? handleAddExpenseSubmit : handleAddRevenueSubmit;
+
+            await onSubmit(data as TransactionCreate);
         } finally {
             setIsSubmitting(false);
         }

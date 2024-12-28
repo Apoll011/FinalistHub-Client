@@ -1,5 +1,6 @@
 // Import node module libraries
 import React, { Suspense } from "react";
+import { Outlet } from "react-router";
 import {createBrowserRouter, Navigate, RouterProvider} from "react-router-dom";
 import {HashLoader} from "react-spinners";
 import EditEventPage from "pages/dashboard/events/EventPage.tsx";
@@ -116,6 +117,11 @@ const App = () => {
         {
           id: "finance",
           path: "/finance",
+          element: (
+              <AdminRoute>
+                <Outlet />
+              </AdminRoute>
+          ),
           children: [
             {
               id: "finance-list",

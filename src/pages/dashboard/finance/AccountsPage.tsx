@@ -4,6 +4,8 @@ import { Bank, CreditCard, Wallet, ArrowUpRight, Calendar } from 'react-bootstra
 import {AccountCreate, AccountResponse, AccountStatement, FinanceApi} from "api";
 import {PlusCircle} from "react-feather";
 import TransactionsList from "components/financial/TransactionsList.tsx";
+import TransactionForm from "components/financial/TransactionForm.tsx";
+import TransferForm from "components/financial/TransferForm.tsx";
 
 const apiFunctions = {
     getAccounts: async () => await new FinanceApi().getAccountsFinanceAccountsGet(),
@@ -25,6 +27,11 @@ const AccountsPage = () => {
     const [endDate, setEndDate] = useState(new Date());
     const [statementData, setStatementData] = useState<AccountStatement | null>(null);
     const [loadingStatement, setLoadingStatement] = useState(false);
+
+    const [showAddRevenueModal, setShowAddRevenueModal] = useState(false);
+    const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
+    const [showTransferModal, setShowTransferModal] = useState(false);
+
 
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [createLoading, setCreateLoading] = useState(false);
@@ -117,14 +124,25 @@ const AccountsPage = () => {
                     <div>
                         <h1 className="display-4 mb-0">Contas</h1>
                     </div>
-                    <Button
-                        variant="primary"
-                        className="d-flex align-items-center shadow-sm"
-                        onClick={() => setShowCreateModal(true)}
-                    >
-                        <PlusCircle size={20} className="me-2" />
-                        Nova Conta
-                    </Button>
+                    <Col xs="auto">
+                        <Button variant="primary" className="bg-success mx-3" onClick={() => setShowAddRevenueModal(true)}>
+                            Adicionar Receita
+                        </Button>
+                        <Button variant="primary" className="bg-warning mx-3" onClick={() => setShowAddExpenseModal(true)}>
+                            Adicionar Despesa
+                        </Button>
+                        <Button variant="primary" className="bg-info  mx-3 " onClick={() => setShowTransferModal(true)}>
+                            Transferir Dinheiro
+                        </Button>
+                        <Button
+                            variant="primary"
+                            className="align-items-center shadow-sm"
+                            onClick={() => setShowCreateModal(true)}
+                        >
+                            <PlusCircle size={20} className="me-2" />
+                            Nova Conta
+                        </Button>
+                    </Col>
                 </Col>
             </Row>
 
@@ -323,7 +341,7 @@ const AccountsPage = () => {
                             <Form.Control
                                 as="textarea"
                                 rows={3}
-                                placeholder="DEscrição da Conta"
+                                placeholder="Descrição da Conta"
                                 value={newAccount.description as string}
                                 onChange={(e) => setNewAccount({...newAccount, description: e.target.value})}
                                 required
@@ -365,6 +383,20 @@ const AccountsPage = () => {
                     transition: all 0.3s ease;
                 }
             `}</style>
+            <TransactionForm
+                show={showAddRevenueModal}
+                onHide={() => setShowAddRevenueModal(false)}
+                transactionType="revenue"
+            />
+            <TransactionForm
+                show={showAddExpenseModal}
+                onHide={() => setShowAddExpenseModal(false)}
+                transactionType="expense"
+            />
+            <TransferForm
+                show={showTransferModal}
+                onHide={() => setShowTransferModal(false)}
+            />
         </Container>
     );
 };
