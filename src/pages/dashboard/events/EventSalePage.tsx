@@ -7,7 +7,6 @@ import {
 import { SalesApi, EventsApi, Item, SaleCreate, ItemCreate } from "api";
 import { useParams } from "react-router-dom";
 
-// Sales Queue for background processing
 class SalesQueue {
     private queue: SaleCreate[] = [];
     private processing = false;
@@ -44,7 +43,6 @@ const salesQueue = new SalesQueue();
 const SaleApi = {
     sellStockItem: (data: SaleCreate) => new SalesApi().sellStockItemSalesStockItemsPost({saleCreate: data}),
     registerItem: (id: string, data: ItemCreate) => new EventsApi().addEventItemsEventsEventIdItemsPost({eventId: id, itemCreate: data}),
-    getInventoryAlerts: (id: string, threshold: number) => new SalesApi().getInventoryAlertsSalesInventoryAlertsEventIdGet({eventId: id, threshold: threshold}),
     createBulkSale: (data: SaleCreate[]) => new SalesApi().createBulkSaleSalesBulkSalePost({saleCreate: data}),
     getEventItems: (eventId: string) => new EventsApi().getEventItemsEventsEventIdItemsGet({eventId: eventId}),
     updateItemQuantity: (itemId: string, quantity: number) =>
@@ -78,6 +76,11 @@ export const SalesDashboard = () => {
         quantitySold: 1
     });
 
+    const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+    const [showBulkSaleModal, setShowBulkSaleModal] = useState(false);
+    const [bulkQuantities, setBulkQuantities] = useState<Record<string, number>>({});
+
+
     const addNotification = (message: string, variant: string) => {
         const id = Date.now();
         setNotifications(prev => [...prev, { id, message, variant }]);
@@ -99,7 +102,7 @@ export const SalesDashboard = () => {
         } catch (error) {
             addNotification(`Erro: ${error}`, 'danger');
         }
-    }, [id, threshold]);
+    }, [id]);
 
     const filteredItems = items_list.filter(item =>
         item.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -175,6 +178,53 @@ export const SalesDashboard = () => {
         }
     };
 
+    const handleCheckboxChange = (itemId: string) => {
+        const newSelected = new Set(selectedItems);
+        if (newSelected.has(itemId)) {
+            newSelected.delete(itemId);
+            const newBulkQuantities = { ...bulkQuantities };
+            delete newBulkQuantities[itemId];
+            setBulkQuantities(newBulkQuantities);
+        } else {
+            newSelected.add(itemId);
+            setBulkQuantities(prev => ({
+                ...prev,
+                [itemId]: 1
+            }));
+        }
+        setSelectedItems(newSelected);
+    };
+
+    const handleBulkSale = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const bulkSales: SaleCreate[] = Array.from(selectedItems).map(itemId => ({
+            itemId,
+            quantitySold: bulkQuantities[itemId] || 1
+        }));
+
+        try {
+            for (const bulkSale of bulkSales) {
+                salesQueue.addSale(
+                    bulkSale,
+                    () => {
+                        addNotification('Venda registrada com sucesso!', 'success');
+                        fetchData();
+                    },
+                    (error) => {
+                        addNotification(`Erro: ${error}`, 'danger');
+                    }
+                );
+            }
+            addNotification('Vendas em massa em espera!', 'success');
+            setSelectedItems(new Set());
+            setBulkQuantities({});
+            setShowBulkSaleModal(false);
+        } catch (error) {
+            addNotification(`Erro: ${error}`, 'danger');
+        }
+    };
+
+
     useEffect(() => {
         fetchData();
         const intervalId = setInterval(fetchData, 50000);
@@ -204,6 +254,15 @@ export const SalesDashboard = () => {
                     </h1>
                 </Col>
                 <Col className="text-end">
+                    <Button
+                        variant="success"
+                        className="me-2"
+                        onClick={() => setShowBulkSaleModal(true)}
+                        disabled={selectedItems.size === 0}
+                    >
+                        <Cart className="me-2" />
+                        Venda em Massa ({selectedItems.size})
+                    </Button>
                     <Button
                         variant="primary"
                         className="d-inline-flex align-items-center"
@@ -255,6 +314,26 @@ export const SalesDashboard = () => {
                     <Table responsive hover>
                         <thead className="table-light">
                         <tr>
+                            <th>
+                                <Form.Check
+                                    type="checkbox"
+                                    checked={selectedItems.size > 0 && selectedItems.size === filteredItems.length}
+                                    onChange={(e) => {
+                                        if (e.target.checked) {
+                                            const allIds = new Set(filteredItems.map(item => item.id));
+                                            setSelectedItems(allIds);
+                                            const newQuantities: Record<string, number> = {};
+                                            filteredItems.forEach(item => {
+                                                newQuantities[item.id] = 1;
+                                            });
+                                            setBulkQuantities(newQuantities);
+                                        } else {
+                                            setSelectedItems(new Set());
+                                            setBulkQuantities({});
+                                        }
+                                    }}
+                                />
+                            </th>
                             <th>Nome</th>
                             <th>Quantidade</th>
                             <th>Preço</th>
@@ -268,6 +347,14 @@ export const SalesDashboard = () => {
                                     key={item.id}
                                     className={`align-middle ${item.quantity <= threshold ? 'table-warning' : ''}`}
                                 >
+                                    <td>
+                                        <Form.Check
+                                            type="checkbox"
+                                            checked={selectedItems.has(item.id)}
+                                            onChange={() => handleCheckboxChange(item.id)}
+                                            disabled={item.quantity === 0}
+                                        />
+                                    </td>
                                     <td>{item.name}</td>
                                     <td>
                                             <span className={`badge bg-${
@@ -279,7 +366,7 @@ export const SalesDashboard = () => {
                                             </span>
                                     </td>
                                     <td>
-                                        <CashCoin className="me-1" />
+                                        <CashCoin className="me-1"/>
                                         {item.price.toFixed(2).replace(".", "$")}
                                     </td>
                                     <td>
@@ -289,7 +376,7 @@ export const SalesDashboard = () => {
                                                 size="sm"
                                                 onClick={() => handleItemClick(item)}
                                             >
-                                                <Cart className="me-1" />
+                                                <Cart className="me-1"/>
                                                 Vender
                                             </Button>
                                             <Button
@@ -302,7 +389,7 @@ export const SalesDashboard = () => {
                                                     setShowRecountModal(true);
                                                 }}
                                             >
-                                                <ArrowRepeat className="me-1" />
+                                                <ArrowRepeat className="me-1"/>
                                                 Recontar
                                             </Button>
                                         </div>
@@ -312,7 +399,7 @@ export const SalesDashboard = () => {
                         ) : (
                             <tr>
                                 <td colSpan={4} className="text-center py-4">
-                                    <BoxSeam className="me-2" size={24} />
+                                    <BoxSeam className="me-2" size={24}/>
                                     Sem Items
                                 </td>
                             </tr>
@@ -325,7 +412,7 @@ export const SalesDashboard = () => {
             <Modal show={showSaleModal} onHide={() => setShowSaleModal(false)} centered>
                 <Modal.Header closeButton className="bg-primary text-white">
                     <Modal.Title>
-                        <Cart className="me-2" />
+                        <Cart className="me-2"/>
                         Nova Venda de {selectedItem?.name || ''}
                     </Modal.Title>
                 </Modal.Header>
@@ -333,7 +420,7 @@ export const SalesDashboard = () => {
                     <div className="mb-4">
                         <div className="d-flex justify-content-between align-items-center p-3 bg-light rounded">
                             <div>
-                                <BoxSeam className="me-2" />
+                                <BoxSeam className="me-2"/>
                                 <span className="fw-bold">Estoque Disponível:</span>
                             </div>
                             <span className={`badge bg-${
@@ -490,6 +577,56 @@ export const SalesDashboard = () => {
                     </Form>
                 </Modal.Body>
             </Modal>
+
+            <Modal show={showBulkSaleModal} onHide={() => setShowBulkSaleModal(false)} centered size="lg">
+                <Modal.Header closeButton className="bg-success text-white">
+                    <Modal.Title>
+                        <Cart className="me-2" />
+                        Venda em Massa
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={handleBulkSale}>
+                        {Array.from(selectedItems).map(itemId => {
+                            const item = items_list.find(i => i.id === itemId);
+                            return (
+                                <div key={itemId} className="mb-4 p-3 border rounded">
+                                    <div className="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 className="mb-0">{item?.name}</h5>
+                                        <span className="badge bg-primary">
+                                            Disponível: {item?.quantity}
+                                        </span>
+                                    </div>
+                                    <Form.Group>
+                                        <Form.Label>Quantidade</Form.Label>
+                                        <Form.Control
+                                            type="number"
+                                            value={bulkQuantities[itemId] || 1}
+                                            onChange={(e) => setBulkQuantities(prev => ({
+                                                ...prev,
+                                                [itemId]: parseInt(e.target.value)
+                                            }))}
+                                            min="1"
+                                            max={item?.quantity}
+                                            required
+                                        />
+                                    </Form.Group>
+                                </div>
+                            );
+                        })}
+                        <div className="d-flex justify-content-end gap-2">
+                            <Button variant="outline-secondary" onClick={() => setShowBulkSaleModal(false)}>
+                                Cancelar
+                            </Button>
+                            <Button variant="success" type="submit">
+                                <Cart className="me-2" />
+                                Confirmar Vendas
+                            </Button>
+                        </div>
+                    </Form>
+                </Modal.Body>
+            </Modal>
+
         </div>
     );
 };
