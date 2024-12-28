@@ -18,7 +18,7 @@ const Header: React.FC<HeaderProps> = ({ toggleMenu }) => {
         navigate('/profile');
     };
     const getProfileImage = (username: string) => {
-        return `https://api.multiavatar.com/${username}.svg`; // Use um fundo aleatório & tamanho
+        return `https://api.multiavatar.com/${username.toLowerCase()}.svg`; // Use um fundo aleatório & tamanho
     };
 
     return (

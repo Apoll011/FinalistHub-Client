@@ -68,7 +68,7 @@ const SignUp = () => {
   };
 
   const getProfileImage = (username: string) => {
-    return `https://api.multiavatar.com/${username}.svg`;
+    return `https://api.multiavatar.com/${username.toLowerCase()}.svg`;
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | HTMLFormElement>) => {

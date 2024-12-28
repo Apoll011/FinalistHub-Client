@@ -70,14 +70,13 @@ const ProfileManagement: React.FC = () => {
     };
 
     const getProfileImage = (username: string) => {
-        return `https://api.multiavatar.com/${username}.svg`; // Use um fundo aleatório & tamanho
+        return `https://api.multiavatar.com/${username.toLowerCase()}.svg`; // Use um fundo aleatório & tamanho
     };
 
     return (
         <Container className="py-4">
             <Row className="justify-content-center">
                 <Col xs={12} md={10} lg={8}>
-                    {/* Cartão de informações do usuário */}
                     {user && (
                         <Card className="mb-4">
                             <Card.Header>
