@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card, Row, Col, Button, Modal, Form, Toast, ToastContainer, Badge } from 'react-bootstrap';
-import { Cart, CurrencyDollar, People, Tag } from 'react-bootstrap-icons';
+import { Card, Row, Col, Button, Modal, Form, Toast, ToastContainer, Badge, ToggleButton } from 'react-bootstrap';
+import { Cart, CurrencyDollar, People, Tag, Lightning } from 'react-bootstrap-icons';
 import { SalesApi, TicketAvailability, TicketSaleCreate } from "api";
 import { useParams } from "react-router-dom";
 
@@ -126,6 +126,7 @@ const TicketSalesPage = () => {
     const [selectedTicket, setSelectedTicket] = useState<TicketAvailability|null>(null);
     const [showModal, setShowModal] = useState(false);
     const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [isQuickMode, setIsQuickMode] = useState(false); // Novo estado
     const { eventId } = useParams();
 
     const addNotification = (message: string, variant: string) => {
@@ -163,11 +164,20 @@ const TicketSalesPage = () => {
         fetchTickets();
     };
 
+    const handleQuickSale = (ticket: TicketAvailability) => {
+        const sale = { ticketId: ticket.ticketId, quantity: 1 };
+        salesQueue.addSale(
+            sale,
+            () => handleSaleSuccess(),
+            (error) => addNotification(`Erro na venda: ${error}`, "danger")
+        );
+    };
+
     return (
         <div className="p-4">
             <ToastContainer position="top-end" className="p-3">
                 {notifications.map(({ id, message, variant }) => (
-                    <Toast key={id} onClose={() => setNotifications(prev => prev.filter(n => n.id !== id))}>
+                    <Toast key={id} onClose={() => setNotifications((prev) => prev.filter((n) => n.id !== id))}>
                         <Toast.Header className={`bg-${variant} text-white`}>
                             <strong className="me-auto">Notificação</strong>
                         </Toast.Header>
@@ -177,12 +187,22 @@ const TicketSalesPage = () => {
             </ToastContainer>
 
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h1 className="mb-0">
-                    Venda de Bilhetes
-                </h1>
-                <div className="bg-light p-2 rounded">
-                    <CurrencyDollar className="me-2" />
-                    Total de bilhetes: {tickets.length}
+                <h1 className="mb-0">Venda de Bilhetes</h1>
+                <div className="d-flex align-items-center">
+                    <ToggleButton
+                        type="checkbox"
+                        variant="outline-primary"
+                        checked={isQuickMode}
+                        value="1"
+                        onChange={(e) => setIsQuickMode(e.currentTarget.checked)}
+                        className="me-3" id={'toggle'}>
+                        <Lightning className="me-2" />
+                        {isQuickMode ? 'Modo Rápido ON' : 'Modo Rápido OFF'}
+                    </ToggleButton>
+                    <div className="bg-light p-2 rounded">
+                        <CurrencyDollar className="me-2" />
+                        Total de bilhetes: {tickets.length}
+                    </div>
                 </div>
             </div>
 
@@ -215,13 +235,17 @@ const TicketSalesPage = () => {
                                     variant={ticket.available ? "primary" : "secondary"}
                                     className="w-100"
                                     onClick={() => {
-                                        setSelectedTicket(ticket);
-                                        setShowModal(true);
+                                        if (isQuickMode) {
+                                            handleQuickSale(ticket);
+                                        } else {
+                                            setSelectedTicket(ticket);
+                                            setShowModal(true);
+                                        }
                                     }}
                                     disabled={!ticket.available}
                                 >
                                     <Cart className="me-2" />
-                                    {ticket.available ? "Vender" : "Indisponível"}
+                                    {ticket.available ? (isQuickMode ? "Venda Rápida" : "Vender") : "Indisponível"}
                                 </Button>
                             </Card.Body>
                         </Card>
