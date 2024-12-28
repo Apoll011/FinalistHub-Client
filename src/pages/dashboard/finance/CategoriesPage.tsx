@@ -209,14 +209,13 @@ const CategoriesPage = () => {
                                 <tr key={category.id}>
                                     <td>{category.name}</td>
                                     <td>{category.description}</td>
-                                    <td>
+                                    <td className="d-flex justify-content-between">
                                         <Button
                                             variant="warning"
                                             className="me-2"
                                             onClick={() => CategoryClick(category.id)}
                                         >
                                             {loading ? <Spinner animation="border" size="sm" /> : 'Estatísticas'}
-
                                         </Button>
                                         <Button
                                             variant="warning"
@@ -237,6 +236,7 @@ const CategoriesPage = () => {
                                     </td>
                                 </tr>
                             ))}
+
                             </tbody>
                         </Table>
                     </div>

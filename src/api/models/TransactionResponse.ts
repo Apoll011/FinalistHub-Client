@@ -118,24 +118,6 @@ export interface TransactionResponse {
      * @memberof TransactionResponse
      */
     id: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof TransactionResponse
-     */
-    receiptFile?: string | null;
-    /**
-     * 
-     * @type {any}
-     * @memberof TransactionResponse
-     */
-    reconciliationStatus: any | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof TransactionResponse
-     */
-    reconciliationNotes?: string | null;
 }
 
 
@@ -149,7 +131,6 @@ export function instanceOfTransactionResponse(value: object): value is Transacti
     if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
     if (!('updatedAt' in value) || value['updatedAt'] === undefined) return false;
     if (!('id' in value) || value['id'] === undefined) return false;
-    if (!('reconciliationStatus' in value) || value['reconciliationStatus'] === undefined) return false;
     return true;
 }
 
@@ -177,9 +158,6 @@ export function TransactionResponseFromJSONTyped(json: any, ignoreDiscriminator:
         'createdAt': (new Date(json['created_at'])),
         'updatedAt': (new Date(json['updated_at'])),
         'id': json['id'],
-        'receiptFile': json['receipt_file'] == null ? undefined : json['receipt_file'],
-        'reconciliationStatus': json['reconciliation_status'],
-        'reconciliationNotes': json['reconciliation_notes'] == null ? undefined : json['reconciliation_notes'],
     };
 }
 
@@ -208,9 +186,6 @@ export function TransactionResponseToJSONTyped(value?: TransactionResponse | nul
         'created_at': ((value['createdAt']).toISOString()),
         'updated_at': ((value['updatedAt']).toISOString()),
         'id': value['id'],
-        'receipt_file': value['receiptFile'],
-        'reconciliation_status': value['reconciliationStatus'],
-        'reconciliation_notes': value['reconciliationNotes'],
     };
 }
 
