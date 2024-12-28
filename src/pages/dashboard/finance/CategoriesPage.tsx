@@ -5,10 +5,10 @@ import {
     CategoryUsageResponse,
     ListCategoriesCategoriesGetRequest,
     TransactionCategoryCreate,
-    TransactionCategoryResponse, TransactionResponse
+    TransactionCategoryResponse,
+    TransactionResponse
 } from 'api';
-import {Bar, Line} from 'react-chartjs-2';
-
+import { Line } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -37,8 +37,8 @@ const apiFunctions = {
     listCategories: async (params: ListCategoriesCategoriesGetRequest | undefined) => new CategoriesApi().listCategoriesCategoriesGet(params),
     updateCategory: async (id: string, data: TransactionCategoryCreate) => new CategoriesApi().updateCategoryCategoriesCategoryIdPut({ categoryId: id, transactionCategoryCreate: data }),
     deleteCategory: async (id: string) => new CategoriesApi().deleteCategoryCategoriesCategoryIdDelete({ categoryId: id }),
-    getCategoryUsage: async (categoryId: string, startDate?: string, endDate?: string) =>
-        new CategoriesApi().getCategoryUsageCategoriesCategoryIdUsageGet({ categoryId: categoryId}),
+    getCategoryUsage: async (categoryId: string) =>
+        new CategoriesApi().getCategoryUsageCategoriesCategoryIdUsageGet({ categoryId: categoryId }),
 };
 
 const CategoriesPage = () => {
@@ -47,6 +47,7 @@ const CategoriesPage = () => {
     const [selectedCategory, setSelectedCategory] = useState<TransactionCategoryResponse | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showAddModal, setShowAddModal] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [categoryUsageData, setCategoryUsageData] = useState<CategoryUsageResponse | null>(null);
@@ -96,6 +97,7 @@ const CategoriesPage = () => {
             setLoading(true);
             await apiFunctions.createCategory(newCategory);
             setNewCategory({ name: '', description: '' });
+            setShowAddModal(false);
             fetchCategories();
         } catch {
             setError('Failed to create category. Please try again.');
@@ -104,7 +106,7 @@ const CategoriesPage = () => {
         }
     };
 
-    const formatCurrency = (amount:number) => {
+    const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('pt-PT', {
             style: 'currency',
             currency: 'CVE'
@@ -116,7 +118,7 @@ const CategoriesPage = () => {
 
         const response = await apiFunctions.updateCategory(selectedCategory.id, selectedCategory);
         if (response) {
-            setShowModal(false);
+            setShowEditModal(false);
             fetchCategories();
         }
     };
@@ -135,7 +137,7 @@ const CategoriesPage = () => {
             setLoading(true);
             await apiFunctions.deleteCategory(id);
             fetchCategories();
-        } catch (error) {
+        } catch {
             setError('Não é possivel deletar esta categoria pois ele é usada.');
         } finally {
             setLoading(false);
@@ -154,94 +156,104 @@ const CategoriesPage = () => {
         }
     };
 
-
     return (
         <div className="container mt-4">
-            <h1 className="mb-4">Categorias</h1>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h1>Categorias</h1>
+                <Button variant="primary" onClick={() => setShowAddModal(true)}>
+                    Adicionar Categoria
+                </Button>
+            </div>
+
             {error && <Alert variant="danger">{error}</Alert>}
 
-            <Row className="my-6">
-                <Col xl={4} lg={12} md={12} xs={12} className="mb-6 mb-xl-0">
-                    <Card className="mb-4">
-                        <Card.Body>
-                            <Form>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Nome</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Nome da Categoria"
-                                        value={newCategory.name}
-                                        onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                                    />
-                                </Form.Group>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Descrição</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Descrição"
-                                        value={newCategory.description}
-                                        onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
-                                    />
-                                </Form.Group>
+            <div className="table-responsive rounded-3 rounded-bottom-3">
+                <Table hover>
+                    <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Descrição</th>
+                        <th>Ações</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {categories.map((category) => (
+                        <tr key={category.id}>
+                            <td className="w-25">{category.name}</td>
+                            <td className="w-25">{category.description}</td>
+                            <td className="w-25">
                                 <Button
-                                    variant="primary"
-                                    onClick={handleCreateCategory}
-                                    disabled={!newCategory.name || !newCategory.description || loading}
+                                    variant="warning"
+                                    className="me-2"
+                                    onClick={() => CategoryClick(category.id)}
                                 >
-                                    {loading ? <Spinner animation="border" size="sm" /> : 'Criar categoria'}
+                                    {loading ? <Spinner animation="border" size="sm" /> : 'Estatísticas'}
                                 </Button>
-                            </Form>
-                        </Card.Body>
-                    </Card>
-                </Col>
-                <Col xl={8} lg={12} md={12} xs={12}>
-                    <div className="table-responsive rounded-3 rounded-bottom-3">
-                        <Table hover>
-                            <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Descrição</th>
-                                <th>Ações</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {categories.map((category) => (
-                                <tr key={category.id}>
-                                    <td>{category.name}</td>
-                                    <td>{category.description}</td>
-                                    <td className="d-flex justify-content-between">
-                                        <Button
-                                            variant="warning"
-                                            className="me-2"
-                                            onClick={() => CategoryClick(category.id)}
-                                        >
-                                            {loading ? <Spinner animation="border" size="sm" /> : 'Estatísticas'}
-                                        </Button>
-                                        <Button
-                                            variant="warning"
-                                            className="me-2"
-                                            onClick={() => {
-                                                setSelectedCategory(category);
-                                                setShowEditModal(true);
-                                            }}
-                                        >
-                                            {loading ? <Spinner animation="border" size="sm" /> : 'Editar'}
-                                        </Button>
-                                        <Button
-                                            variant="danger"
-                                            onClick={() => handleDeleteCategory(category.id)}
-                                        >
-                                            {loading ? <Spinner animation="border" size="sm" /> : 'Apagar'}
-                                        </Button>
-                                    </td>
-                                </tr>
-                            ))}
+                                <Button
+                                    variant="warning"
+                                    className="me-2"
+                                    onClick={() => {
+                                        setSelectedCategory(category);
+                                        setShowEditModal(true);
+                                    }}
+                                >
+                                    {loading ? <Spinner animation="border" size="sm" /> : 'Editar'}
+                                </Button>
+                                <Button
+                                    variant="danger"
+                                    onClick={() => handleDeleteCategory(category.id)}
+                                >
+                                    {loading ? <Spinner animation="border" size="sm" /> : 'Apagar'}
+                                </Button>
+                            </td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </Table>
+            </div>
 
-                            </tbody>
-                        </Table>
-                    </div>
-                </Col>
-            </Row>
+            {/* Add Category Modal */}
+            <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Adicionar Nova Categoria</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Nome</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Nome da Categoria"
+                                value={newCategory.name}
+                                onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Descrição</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Descrição"
+                                value={newCategory.description}
+                                onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowAddModal(false)}>
+                        Cancelar
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={handleCreateCategory}
+                        disabled={!newCategory.name || !newCategory.description || loading}
+                    >
+                        {loading ? <Spinner animation="border" size="sm" /> : 'Criar categoria'}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            {/* Edit Category Modal */}
             {selectedCategory && (
                 <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
                     <Modal.Header closeButton>
@@ -281,6 +293,8 @@ const CategoriesPage = () => {
                     </Modal.Footer>
                 </Modal>
             )}
+
+            {/* Category Usage Modal */}
             <Modal show={showModal} onHide={() => {
                 setShowModal(false);
                 setCategoryUsageData(null);
