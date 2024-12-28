@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Form, Button, Row, Col, Modal, Alert } from 'react-bootstrap';
+import {Card, Form, Button, Row, Col, Modal, Alert, Spinner} from 'react-bootstrap';
 
 import {Meeting, MeetingList, MeetingsApi} from "api";
 import ShowIfAdmin from "components/auth/admin/show_if_admin.tsx";
@@ -25,14 +25,18 @@ export const MeetingManagement = () => {
     const [uploadFile, setUploadFile] = useState<Blob | null>(null);
     const [alert, setAlert] = useState({ show: false, message: '', variant: '' });
     const [meetings, setMeeting] = useState<MeetingList>( { meetings: [] });
+    const [loading, setLoading] = useState(true);
+
 
     useEffect(() => {
         loadData().then(() => console.log("Loaded meetings."));
     }, []);
 
     const loadData = async () => {
+        setLoading(true);
         const meeting = await MeetingApi.getUpcomingMeetings();
         setMeeting(meeting);
+        setLoading(false);
     }
 
     const [formData, setFormData] = useState({
@@ -144,34 +148,40 @@ export const MeetingManagement = () => {
                 </ShowIfAdmin>
             </Row>
 
-            <Row>
-                {meetings.meetings.map((meeting) => (
-                    <Col key={meeting.id} lg={4} md={6} className="mb-4">
-                        <Card>
-                            <Card.Body>
-                                <Card.Title>Reunião</Card.Title>
-                                <Card.Text>
-                                    <strong>Data:</strong> {meeting.date}<br />
-                                    <strong>Hora:</strong> {meeting.time}<br />
-                                    <strong>Local:</strong> {meeting.location} <br/>
-                                    <strong>Agenda:</strong> {meeting.agenda}
-                                </Card.Text>
-                                <ShowIfAdmin>
-                                    <Button variant="info" size="sm" className="me-2" onClick={() => openModal(meeting)}>
-                                        Editar
+            { loading ? (
+                <div className="text-center py-5">
+                    <Spinner animation="border" variant="primary"/>
+                </div>
+            ) : (
+                <Row>
+                    {meetings.meetings.map((meeting) => (
+                        <Col key={meeting.id} lg={4} md={6} className="mb-4">
+                            <Card>
+                                <Card.Body>
+                                    <Card.Title>Reunião</Card.Title>
+                                    <Card.Text>
+                                        <strong>Data:</strong> {meeting.date}<br />
+                                        <strong>Hora:</strong> {meeting.time}<br />
+                                        <strong>Local:</strong> {meeting.location} <br/>
+                                        <strong>Agenda:</strong> {meeting.agenda}
+                                    </Card.Text>
+                                    <ShowIfAdmin>
+                                        <Button variant="info" size="sm" className="me-2" onClick={() => openModal(meeting)}>
+                                            Editar
+                                        </Button>
+                                        <Button variant="danger" size="sm" className="me-2" onClick={() => handleDelete(meeting.id)}>
+                                            Apagar
+                                        </Button>
+                                    </ShowIfAdmin>
+                                    <Button variant="success" size="sm" onClick={() => downloadMinutes(meeting.id)}>
+                                        ATA
                                     </Button>
-                                    <Button variant="danger" size="sm" className="me-2" onClick={() => handleDelete(meeting.id)}>
-                                        Apagar
-                                    </Button>
-                                </ShowIfAdmin>
-                                <Button variant="success" size="sm" onClick={() => downloadMinutes(meeting.id)}>
-                                    ATA
-                                </Button>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                ))}
-            </Row>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    ))}
+                </Row>
+            )}
 
             <ShowIfAdmin>
                 <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">

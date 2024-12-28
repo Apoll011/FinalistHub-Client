@@ -1,25 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import {Modal, Button, Form, Col, Row, Card, Alert} from 'react-bootstrap';
+import {Modal, Button, Form, Col, Row, Card, Alert, Spinner} from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import {
     EventDetailsResponse,
     EventsApi,
     Ticket,
     Item,
-    ItemCreate, ObservationInput, DateInput
+    ItemCreate, ObservationInput, DateInput, AccountResponse, FinanceApi
 } from 'api';
 import {getStatusBadge} from "pages/dashboard/events/EventsPage.tsx";
+import {useAuth} from "hooks/useAuth.tsx";
 
 const EditEventPage = () => {
     const [showModal, setShowModal] = useState(false);
     const [modalType, setModalType] = useState('');
+    const [accounts, setAccounts] = useState<AccountResponse[]>([]);
     const [event, setEvent] = useState<EventDetailsResponse | null>(null);
     const [tickets, setTickets] = useState<Ticket[]>([]);
     const [items, setItems] = useState<Item[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [accountId, setAccountId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const { id } = useParams();
     const eventsApi = new EventsApi();
+    const { user } = useAuth();
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchEventData().then(() => console.log("Dados refrescados"));
@@ -32,11 +36,12 @@ const EditEventPage = () => {
 
     const fetchEventData = async () => {
         try {
-            const [eventDetailsResult, eventTicketsResult, eventItemsResult] = await Promise.allSettled([
+            const [eventDetailsResult, eventTicketsResult, eventItemsResult, accountResults] = await Promise.allSettled([
                 eventsApi.getEventDetailsEventsEventIdDetailsGet({ eventId: id as string }),
                 eventsApi.getEventTicketsEventsEventIdTicketsGet({ eventId: id as string }),
-                eventsApi.getEventItemsEventsEventIdItemsGet({ eventId: id as string })
-            ]);
+                eventsApi.getEventItemsEventsEventIdItemsGet({ eventId: id as string }),
+                new FinanceApi().getAccountsFinanceAccountsGet()
+        ]);
 
             // Handle each result independently
             if (eventDetailsResult.status === 'fulfilled') {
@@ -63,6 +68,12 @@ const EditEventPage = () => {
                 console.warn('Failed to fetch items:', eventItemsResult.reason);
             }
 
+            if (accountResults.status === 'fulfilled') {
+                setAccounts(accountResults.value);
+            }  else {
+                console.warn('Failed to fetch accounts:', accountResults.reason);
+            }
+
             setLoading(false);
         } catch (error) {
             setError('Um erro inesperado occoreu: ' + error);
@@ -83,6 +94,7 @@ const EditEventPage = () => {
 
     const handleAddTicket = async (formData: {type: string, price: number}) => {
         try {
+            setLoading(true);
             await eventsApi.createTicketEventsEventIdTicketsPost({
                 eventId: id as string,
                 ticketCreate: {
@@ -95,10 +107,12 @@ const EditEventPage = () => {
         } catch {
             setError('Erro ao adicionar bilhete!');
         }
+        setLoading(false);
     };
 
     const handleAddItem = async (formData: ItemCreate) => {
         try {
+            setLoading(true);
             await eventsApi.addEventItemsEventsEventIdItemsPost({
                 eventId: id as string,
                 itemCreate: {
@@ -112,10 +126,12 @@ const EditEventPage = () => {
         } catch  {
             setError('Erro ao adicionar Item!');
         }
+        setLoading(false);
     };
 
     const handleAddObservation = async (formData: ObservationInput) => {
         try {
+            setLoading(true);
             await eventsApi.addObservationEventsEventIdObservationsPost({
                 eventId: id as string,
                 observationInput: {
@@ -127,10 +143,12 @@ const EditEventPage = () => {
         } catch  {
             setError('Erro ao adicionar observação');
         }
+        setLoading(false);
     };
 
     const handleEventAction = async (action: string, dateInput: DateInput = {date: "", time: ""}) => {
         try {
+            setLoading(true);
             switch (action) {
                 case 'cancel':
                     await eventsApi.cancelEventEventsEventIdCancelPatch({eventId: id as string});
@@ -142,20 +160,25 @@ const EditEventPage = () => {
                     });
                     break;
                 case 'close':
-                    await eventsApi.closeEventEventsEventIdClosePost({eventId: id as string});
+                    if (!accountId) throw Error("Expected Account!")
+                    await eventsApi.closeEventEventsEventClosePost({closeEventRequest: {eventId: id as string, userId: user?.id.toString() as string, toAccountId: accountId as string}});
                     break;
                 case 'reopen':
                     await eventsApi.reopenEventEventsEventIdReopenPatch({eventId: id as string});
                     break;
             }
+            setAccountId(null);
             await fetchEventData();
             handleModalClose();
-        } catch {
-            setError(`Erro ao ${action} evento`);
+        } catch (err) {
+            setError(`Erro ao ${action} evento ` + err);
         }
+        setLoading(false);
     };
 
-    if (loading) return <div>Carregando...</div>;
+    if (loading && !event) return <div className="text-center py-5">
+        <Spinner animation="border" variant="primary"/>
+    </div>;
     if (error) return <Alert variant="danger">{error}</Alert>;
     if (!event) return <Alert variant="warning">Evento não encontrado</Alert>;
 
@@ -163,7 +186,6 @@ const EditEventPage = () => {
         <div className="container my-5">
             <h1 className="mb-4">Editar Evento: {event.name}</h1>
 
-            {/* General Event Data */}
             <Card className="mb-4">
                 <Card.Body>
                     <h5>Informações Gerais</h5>
@@ -213,7 +235,6 @@ const EditEventPage = () => {
                 </Card.Body>
             </Card>
 
-            {/* Tickets */}
             <Card className="mb-4">
                 <Card.Body>
                     <h5>Bilhetes</h5>
@@ -246,7 +267,7 @@ const EditEventPage = () => {
                                             });
                                             fetchEventData();
                                         }}
-                                        disabled={event.status !== 'active'}
+                                        disabled={event.status !== 'active' || loading}
                                     >
                                         {ticket.available ? "Fora de Estoque" : "Em Estoque"}
                                     </Button>
@@ -260,7 +281,7 @@ const EditEventPage = () => {
                                                 });
                                                 fetchEventData();
                                             }}
-                                            disabled={event.status !== 'active'}
+                                            disabled={event.status !== 'active' || loading}
                                         >
                                             Deletar
                                         </Button></td>
@@ -272,7 +293,6 @@ const EditEventPage = () => {
                 </Card.Body>
             </Card>
 
-            {/* Items */}
             <Card className="mb-4">
                 <Card.Body>
                     <h5>Items</h5>
@@ -306,7 +326,7 @@ const EditEventPage = () => {
                                                 });
                                                 fetchEventData();
                                             }}
-                                            disabled={event.status !== 'active'}
+                                            disabled={event.status !== 'active' || loading}
                                         >
                                             Deletar
                                         </Button></td>
@@ -318,11 +338,10 @@ const EditEventPage = () => {
                 </Card.Body>
             </Card>
 
-            {/* Observations */}
             <Card className="mb-4">
                 <Card.Body>
                     <h5>Observações</h5>
-                    <Button onClick={() => handleModalOpen('observation')} className="mb-3">
+                    <Button onClick={() => handleModalOpen('observation')} disabled={loading} className="mb-3">
                         Adicionar Observações
                     </Button>
                     <ul className="list-unstyled">
@@ -333,9 +352,6 @@ const EditEventPage = () => {
                 </Card.Body>
             </Card>
 
-
-
-            {/* Actions */}
             <Card className="mb-4">
                 <Card.Body>
                     <h5>Ações</h5>
@@ -343,7 +359,7 @@ const EditEventPage = () => {
                         variant="warning"
                         className="m-2"
                         onClick={() => handleModalOpen('cancel')}
-                        disabled={event.status !== 'active'}
+                        disabled={event.status !== 'active' || loading}
                     >
                         Cancelar Evento
                     </Button>
@@ -351,7 +367,7 @@ const EditEventPage = () => {
                         variant="primary"
                         className="m-2"
                         onClick={() => handleModalOpen('reschedule')}
-                        disabled={event.status !== 'active'}
+                        disabled={event.status !== 'active' || loading}
                     >
                         Reagendar Evento
                     </Button>
@@ -359,7 +375,7 @@ const EditEventPage = () => {
                         variant="success"
                         className="m-2"
                         onClick={() => handleModalOpen('close')}
-                        disabled={event.status !== 'active'}
+                        disabled={event.status !== 'active' || loading}
                     >
                         Fechar Evento
                     </Button>
@@ -367,14 +383,13 @@ const EditEventPage = () => {
                         variant="success"
                         className="m-2"
                         onClick={() => handleModalOpen('reopen')}
-                        disabled={event.status !== 'cancelled'}
+                        disabled={event.status !== 'cancelled' || loading}
                     >
                         Reabrir Evento
                     </Button>
                 </Card.Body>
             </Card>
 
-            {/* Modal */}
             <Modal show={showModal} onHide={handleModalClose}>
                 <Modal.Header closeButton>
                     <Modal.Title>
@@ -405,7 +420,7 @@ const EditEventPage = () => {
                                 <Form.Label>Preço</Form.Label>
                                 <Form.Control type="number" name="price" step="0.01" required />
                             </Form.Group>
-                            <Button type="submit">Adicionar Bilhete</Button>
+                            <Button disabled={loading} type="submit">Adicionar Bilhete</Button>
                         </Form>
                     )}
 
@@ -431,7 +446,7 @@ const EditEventPage = () => {
                                 <Form.Label>Preço</Form.Label>
                                 <Form.Control type="number" name="price" step="0.01" required />
                             </Form.Group>
-                            <Button type="submit">Add Item</Button>
+                            <Button disabled={loading}  type="submit">Add Item</Button>
                         </Form>
                     )}
 
@@ -447,7 +462,7 @@ const EditEventPage = () => {
                                 <Form.Label>Observação</Form.Label>
                                 <Form.Control as="textarea" name="content" rows={3} required />
                             </Form.Group>
-                            <Button type="submit">Adicionar Observação</Button>
+                            <Button disabled={loading}  type="submit">Adicionar Observação</Button>
                         </Form>
                     )}
 
@@ -465,14 +480,32 @@ const EditEventPage = () => {
                                 <Form.Label>Nova Hora</Form.Label>
                                 <Form.Control type="time" name="time" id="time" defaultValue={event.time} required />
                             </Form.Group>
-                            <Button type="submit">Reagendar</Button>
+                            <Button disabled={loading}  type="submit">Reagendar</Button>
                         </Form>
                     )}
 
                     {(modalType === 'cancel' || modalType === 'close' || modalType === 'reopen') && (
                         <div>
                             <p>Tems certeza que queres {modalType} este evento?</p>
+                            {modalType === 'close' && (
+                            <Form>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>
+                                       Conta de Destino
+                                    </Form.Label>
+                                    <Form.Select name="account_id" onChange={(e) => setAccountId(e.target.value)} required>
+                                        <option value="">Selecione a conta</option>
+                                        {accounts.map(account => (
+                                            <option key={account.id} value={account.id}>
+                                                {account.name} ({account.type})
+                                            </option>
+                                        ))}
+                                    </Form.Select>
+                                </Form.Group>
+                            </Form>
+                            )}
                             <Button
+                                disabled={loading}
                                 variant={modalType === 'cancel' ? 'warning' : 'success'}
                                 onClick={() => handleEventAction(modalType)}
                             >

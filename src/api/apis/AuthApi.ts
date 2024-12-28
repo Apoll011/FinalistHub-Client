@@ -39,6 +39,10 @@ export interface DeleteUserAuthUserUsernameDeleteRequest {
     username: string;
 }
 
+export interface GetNameAuthNameGetRequest {
+    userId: string;
+}
+
 export interface LoginAuthLoginPostRequest {
     userLogin: UserLogin;
 }
@@ -176,6 +180,47 @@ export class AuthApi extends runtime.BaseAPI {
      */
     async getMeAuthMeGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<any> {
         const response = await this.getMeAuthMeGetRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Get Name
+     */
+    async getNameAuthNameGetRaw(requestParameters: GetNameAuthNameGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<any>> {
+        if (requestParameters['userId'] == null) {
+            throw new runtime.RequiredError(
+                'userId',
+                'Required parameter "userId" was null or undefined when calling getNameAuthNameGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['userId'] != null) {
+            queryParameters['user_id'] = requestParameters['userId'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/auth/name`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<any>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
+    }
+
+    /**
+     * Get Name
+     */
+    async getNameAuthNameGet(requestParameters: GetNameAuthNameGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<any> {
+        const response = await this.getNameAuthNameGetRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

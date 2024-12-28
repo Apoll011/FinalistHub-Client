@@ -22,6 +22,7 @@ models/CashflowForecast.ts
 models/CategorySpending.ts
 models/CategorySpendingAnalysis.ts
 models/CategoryUsageResponse.ts
+models/CloseEventRequest.ts
 models/DailyForecast.ts
 models/DateInput.ts
 models/DateRange.ts

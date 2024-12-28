@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {Card, Button, Row, Col, Alert, Spinner} from 'react-bootstrap';
-import {CategoriesApi, EventsApi, FinanceApi, TransactionResponse} from 'api';
+import {AuthApi, CategoriesApi, EventsApi, FinanceApi, TransactionResponse} from 'api';
 import { Bank, CreditCard, Wallet } from 'react-bootstrap-icons';
 import {useParams} from "react-router-dom";
 import ReactDOMServer from "react-dom/server";
@@ -14,10 +14,12 @@ const TransactionCard: React.FC<TransactionCardProps> = ({transaction}) => {
         accounts: { [key: string]: string };
         category: string;
         event: string;
+        user: string;
     }>({
         accounts: {},
         category: '',
-        event: ''
+        event: '',
+        user: ''
     });
 
     const getTransactionColor = (type: string) => {
@@ -95,6 +97,16 @@ const TransactionCard: React.FC<TransactionCardProps> = ({transaction}) => {
             return null;
         }
     };
+    const fetchUserName = async (id: string | null | undefined) => {
+        if (!id) return null;
+        try {
+            const response = await new AuthApi().getNameAuthNameGet({userId: id});
+            return response || null;
+        } catch (error) {
+            console.error(`Failed to fetch name for ID: ${id}`, error);
+            return null;
+        }
+    };
     const fetchAccountName = async (id: string | null | undefined) => {
         if (!id) return "N/A";
         try {
@@ -109,7 +121,7 @@ const TransactionCard: React.FC<TransactionCardProps> = ({transaction}) => {
     const fetchAllNames = async () => {
 
         try {
-            const [accountResults, categoryName, eventName] = await Promise.all([
+            const [accountResults, categoryName, eventName, userName] = await Promise.all([
                 Promise.all(
                     [transaction?.fromAccountId, transaction?.toAccountId]
                         .filter(Boolean)
@@ -125,6 +137,9 @@ const TransactionCard: React.FC<TransactionCardProps> = ({transaction}) => {
                 ),
                 fetchEntityName(
                     transaction?.eventId
+                ),
+                fetchUserName(
+                    transaction?.createdBy
                 )
             ]);
 
@@ -136,7 +151,8 @@ const TransactionCard: React.FC<TransactionCardProps> = ({transaction}) => {
             setEntityNames({
                 accounts: accountsMap,
                 category: categoryName || 'N/A',
-                event: eventName || 'N/A'
+                event: eventName || 'N/A',
+                user: userName || 'N/A'
             });
         } catch (error) {
             console.error('Error fetching names:', error);
@@ -194,7 +210,7 @@ const TransactionCard: React.FC<TransactionCardProps> = ({transaction}) => {
                 <Row>
                     <Col md={12}>
                         <h5 className="text-muted mb-2">Informações do Sistema</h5>
-                        <p><strong>Criado Por:</strong> {transaction.createdBy || 'N/A'}</p>
+                        <p><strong>Criado Por:</strong> {entityNames.user}</p>
                         <p><strong>Data de Criação:</strong> {new Date(transaction.createdAt).toLocaleString()}</p>
                         <p><strong>Última Atualização:</strong> {new Date(transaction.updatedAt).toLocaleString()}</p>
                     </Col>

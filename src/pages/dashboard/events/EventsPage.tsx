@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Button, Modal, Badge, Form } from 'react-bootstrap';
+import {Container, Row, Col, Button, Modal, Badge, Form, Spinner} from 'react-bootstrap';
 import {EventsApi, Event } from "api";
 import {ListEvents} from "components/event/ListEvents.tsx";
 import {useAuth} from "hooks/useAuth";
@@ -12,11 +12,14 @@ const EventsPage = () => {
     const [events, setEvents] = useState<Event[]>([]);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [createError, setCreateError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
 
     const fetchEvents = async () => {
         try {
+            setLoading(true);
             const data = await new EventsApi().getCalendarEventsCalendarGet();
             setEvents(data);
+            setLoading(false);
         } catch (error) {
             console.error('Error fetching events:', error);
         }
@@ -71,8 +74,11 @@ const EventsPage = () => {
                 </ShowIfAdmin>
             </Row>
 
-
-            <ListEvents events={events}/>
+            { loading ? (
+                <div className="text-center py-5">
+                    <Spinner animation="border" variant="primary"/>
+                </div>
+            ) : (<ListEvents events={events}/>)}
 
             <ShowIfAdmin>
                 <Modal show={showCreateModal} onHide={() => setShowCreateModal(false)}>

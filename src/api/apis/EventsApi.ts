@@ -18,6 +18,7 @@ import type {
   AvailableResponse,
   CancelEventResponse,
   CapacityAnalysisResponse,
+  CloseEventRequest,
   DateInput,
   DuplicateEventResponse,
   Event,
@@ -45,6 +46,8 @@ import {
     CancelEventResponseToJSON,
     CapacityAnalysisResponseFromJSON,
     CapacityAnalysisResponseToJSON,
+    CloseEventRequestFromJSON,
+    CloseEventRequestToJSON,
     DateInputFromJSON,
     DateInputToJSON,
     DuplicateEventResponseFromJSON,
@@ -104,8 +107,8 @@ export interface ChangeAvailabilityEventsTicketIdAvailablePatchRequest {
     available: boolean;
 }
 
-export interface CloseEventEventsEventIdClosePostRequest {
-    eventId: string;
+export interface CloseEventEventsEventClosePostRequest {
+    closeEventRequest: CloseEventRequest;
 }
 
 export interface CreateEventEventsPostRequest {
@@ -354,11 +357,11 @@ export class EventsApi extends runtime.BaseAPI {
     /**
      * Close Event
      */
-    async closeEventEventsEventIdClosePostRaw(requestParameters: CloseEventEventsEventIdClosePostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
-        if (requestParameters['eventId'] == null) {
+    async closeEventEventsEventClosePostRaw(requestParameters: CloseEventEventsEventClosePostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['closeEventRequest'] == null) {
             throw new runtime.RequiredError(
-                'eventId',
-                'Required parameter "eventId" was null or undefined when calling closeEventEventsEventIdClosePost().'
+                'closeEventRequest',
+                'Required parameter "closeEventRequest" was null or undefined when calling closeEventEventsEventClosePost().'
             );
         }
 
@@ -366,11 +369,14 @@ export class EventsApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        headerParameters['Content-Type'] = 'application/json';
+
         const response = await this.request({
-            path: `/events/{event_id}/close`.replace(`{${"event_id"}}`, encodeURIComponent(String(requestParameters['eventId']))),
+            path: `/events/event/close`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
+            body: CloseEventRequestToJSON(requestParameters['closeEventRequest']),
         }, initOverrides);
 
         return new runtime.VoidApiResponse(response);
@@ -379,8 +385,8 @@ export class EventsApi extends runtime.BaseAPI {
     /**
      * Close Event
      */
-    async closeEventEventsEventIdClosePost(requestParameters: CloseEventEventsEventIdClosePostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.closeEventEventsEventIdClosePostRaw(requestParameters, initOverrides);
+    async closeEventEventsEventClosePost(requestParameters: CloseEventEventsEventClosePostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.closeEventEventsEventClosePostRaw(requestParameters, initOverrides);
     }
 
     /**

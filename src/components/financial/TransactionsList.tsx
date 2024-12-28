@@ -13,6 +13,8 @@ const TransactionsList: React.FC<TransactionsListProps> = ({transactions }) => {
     const [accountNames, setAccountNames] = useState<{ [key: string]: string }>({}); // Cache account names
     const [loadingAccounts, setLoadingAccounts] = useState<boolean>(true);
 
+    const swappedTransactions = [...transactions].reverse();
+
     const getTransactionIcon = (type: string) => {
         switch (type) {
             case 'revenue':
@@ -102,7 +104,7 @@ const TransactionsList: React.FC<TransactionsListProps> = ({transactions }) => {
                     <Card.Text className="text-muted fs-5">Carregando...</Card.Text>
                 </Col>
             ) : transactions.length > 0 ? (
-                transactions.map((transaction) => (
+                swappedTransactions.map((transaction) => (
                     <Col key={transaction.id} xs={12} md={6} lg={4}>
                         <Card
                             className="h-100 shadow-sm transition-transform hover-lift"

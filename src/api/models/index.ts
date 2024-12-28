@@ -15,6 +15,7 @@ export * from './CashflowForecast';
 export * from './CategorySpending';
 export * from './CategorySpendingAnalysis';
 export * from './CategoryUsageResponse';
+export * from './CloseEventRequest';
 export * from './DailyForecast';
 export * from './DateInput';
 export * from './DateRange';

@@ -237,7 +237,7 @@ const CashflowForecastPage = () => {
                                             <thead>
                                             <tr>
                                                 <th>Data</th>
-                                                <th>Despesa Projetada</th>
+                                                <th>Ganho Projetada</th>
                                                 <th>Gastos Projetados</th>
                                                 <th>Saldo Projetado</th>
                                             </tr>
