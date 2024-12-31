@@ -255,7 +255,7 @@ const EditEventPage = () => {
                             {tickets.map((ticket, index) => (
                                 <tr key={index}>
                                     <td>{ticket.type}</td>
-                                    <td>${ticket.price}</td>
+                                    <td>{ticket.price}$</td>
                                     <td>{ticket.available ? "Yes" : "No"}</td>
                                     <td><Button
                                         variant="primary"
@@ -313,8 +313,8 @@ const EditEventPage = () => {
                             {items.map((item, index) => (
                                 <tr key={index}>
                                     <td>{item.name}</td>
-                                    <td>{item.price}</td>
-                                    <td>${item.quantity}</td>
+                                    <td>{item.price}$</td>
+                                    <td>{item.quantity}</td>
                                     <td>
                                         <Button
                                             variant="danger"
