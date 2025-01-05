@@ -7,3 +7,4 @@ export * from './FinanceApi';
 export * from './MainApi';
 export * from './MeetingsApi';
 export * from './SalesApi';
+export * from './StandaloneItemsApi';

@@ -5,6 +5,7 @@ apis/FinanceApi.ts
 apis/MainApi.ts
 apis/MeetingsApi.ts
 apis/SalesApi.ts
+apis/StandaloneItemsApi.ts
 apis/index.ts
 index.ts
 models/AccountBalanceResponse.ts
@@ -23,6 +24,7 @@ models/CategorySpending.ts
 models/CategorySpendingAnalysis.ts
 models/CategoryUsageResponse.ts
 models/CloseEventRequest.ts
+models/CloseItemRequest.ts
 models/DailyForecast.ts
 models/DateInput.ts
 models/DateRange.ts
@@ -42,6 +44,7 @@ models/ItemCreate.ts
 models/ItemResponse.ts
 models/ItemSaleDetail.ts
 models/ItemSales.ts
+models/ItemStatus.ts
 models/LowStockItemResponse.ts
 models/Meeting.ts
 models/MeetingBase.ts
@@ -60,8 +63,16 @@ models/RevenueSource.ts
 models/Sale.ts
 models/SaleCreate.ts
 models/SaleItem.ts
+models/SalesByPaymentMethod.ts
 models/SalesData.ts
+models/SalesSummary.ts
 models/SearchEventsResponse.ts
+models/StandaloneItem.ts
+models/StandaloneItemCreate.ts
+models/StandaloneItemReport.ts
+models/StandaloneItemSale.ts
+models/StandaloneItemSaleCreate.ts
+models/StandaloneItemUpdate.ts
 models/Ticket.ts
 models/TicketAvailability.ts
 models/TicketAvailabilityResponse.ts
