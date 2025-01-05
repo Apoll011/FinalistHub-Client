@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card, Row, Col, Button, Modal, Form, Toast, ToastContainer, Badge } from 'react-bootstrap';
+import {Card, Row, Col, Button, Modal, Form, Toast, ToastContainer, Badge, Spinner} from 'react-bootstrap';
 import { Cart, CurrencyDollar, Box, Tag, Calendar, ClockHistory } from 'react-bootstrap-icons';
 import {
-    AccountResponse, CloseItemRequest,
+    AccountResponse,
     FinanceApi,
     ItemStatus,
-    StandaloneItem, StandaloneItemCreate,
+    StandaloneItem,
     StandaloneItemSaleCreate,
     StandaloneItemsApi
 } from "api";
@@ -367,6 +367,8 @@ const StandaloneSalesPage = () => {
     const [showEditStockModal, setShowEditStockModal] = useState(false);
     const [notifications, setNotifications] = useState<Notification[]>([]);
 
+    const [loading, setLoading] = useState(true);
+
     const addNotification = (message: string, variant: string) => {
         const id = Date.now();
         setNotifications(prev => [...prev, { id, message, variant }]);
@@ -379,6 +381,7 @@ const StandaloneSalesPage = () => {
         try {
             const items = await StandaloneApi.getItems('active');
             setItems(items);
+            setLoading(false);
         } catch (error) {
             addNotification(`Erro: ${error}`, "danger");
         }
@@ -435,89 +438,97 @@ const StandaloneSalesPage = () => {
                 </ShowIfAdmin>
             </div>
 
-            <Row className="g-4">
-                {items.map((item) => (
-                    <Col key={item.id} md={4}>
-                        <Card className="h-100 shadow-sm hover-shadow">
-                            <Card.Body>
-                                <Card.Title className="d-flex justify-content-between align-items-center mb-3">
+            { loading ? (
+                <div className="text-center py-5">
+                    <Spinner animation="border" variant="primary"/>
+                </div>
+            ) : (
+                <Row className="g-4">
+                    {items.map((item) => (
+                        <Col key={item.id} md={4}>
+                            <Card className="h-100 shadow-sm hover-shadow">
+                                <Card.Body>
+                                    <Card.Title className="d-flex justify-content-between align-items-center mb-3">
                                     <span>
                                         <Tag className="me-2" />
                                         {item.name}
                                     </span>
-                                    <Badge bg={item.status === 'active' ? "success" : "secondary"}>
-                                        {item.status === 'active' ? "Ativo" : "Fechado"}
-                                    </Badge>
-                                </Card.Title>
-                                <Card.Text className="mb-3">{item.description}</Card.Text>
-                                <div className="bg-light p-3 rounded mb-3">
-                                    <div className="d-flex justify-content-between mb-2">
-                                        <div>
-                                            <CurrencyDollar className="me-1" />
-                                            <span className="fw-bold">Preço:</span>
+                                        <Badge bg={item.status === 'active' ? "success" : "secondary"}>
+                                            {item.status === 'active' ? "Ativo" : "Fechado"}
+                                        </Badge>
+                                    </Card.Title>
+                                    <Card.Text className="mb-3">{item.description}</Card.Text>
+                                    <div className="bg-light p-3 rounded mb-3">
+                                        <div className="d-flex justify-content-between mb-2">
+                                            <div>
+                                                <CurrencyDollar className="me-1" />
+                                                <span className="fw-bold">Preço:</span>
+                                            </div>
+                                            <span className="text-primary fw-bold">${item.price}</span>
                                         </div>
-                                        <span className="text-primary fw-bold">${item.price}</span>
-                                    </div>
-                                    <div className="d-flex justify-content-between">
-                                        <div>
-                                            <Box className="me-1" />
-                                            <span className="fw-bold">Estoque:</span>
+                                        <div className="d-flex justify-content-between">
+                                            <div>
+                                                <Box className="me-1" />
+                                                <span className="fw-bold">Estoque:</span>
+                                            </div>
+                                            <span>{item.quantity} unidades</span>
                                         </div>
-                                        <span>{item.quantity} unidades</span>
                                     </div>
-                                </div>
-                                <div className="small text-muted mb-3">
-                                    <div>
-                                        <Calendar className="me-1" />
-                                        Criado em: {formatDate(item.createdAt)}
+                                    <div className="small text-muted mb-3">
+                                        <div>
+                                            <Calendar className="me-1" />
+                                            Criado em: {formatDate(item.createdAt)}
+                                        </div>
+                                        <div>
+                                            <ClockHistory className="me-1" />
+                                            Atualizado em: {formatDate(item.updatedAt)}
+                                        </div>
                                     </div>
-                                    <div>
-                                        <ClockHistory className="me-1" />
-                                        Atualizado em: {formatDate(item.updatedAt)}
-                                    </div>
-                                </div>
-                                <Button
-                                    variant={item.quantity > 0 ? "primary" : "secondary"}
-                                    className="w-100"
-                                    onClick={() => {
-                                        setSelectedItem(item);
-                                        setShowModal(true);
-                                    }}
-                                    disabled={item.quantity === 0 || item.status !== 'active'}
-                                >
-                                    <Cart className="me-2" />
-                                    {item.quantity > 0 && item.status === 'active' ? "Vender" : "Indisponível"}
-                                </Button>
-                                <Button
-                                    variant="info"
-                                    className="w-100 mt-2"
-                                    onClick={() => {
-                                        setSelectedItem(item);
-                                        setShowEditStockModal(true);
-                                    }}
-                                    disabled={item.status !== 'active'}
-                                >
-                                    <Box className="me-2" />
-                                    Atualizar Estoque
-                                </Button>
-                                <ShowIfAdmin>
                                     <Button
-                                        variant= "warning"
+                                        variant={item.quantity > 0 ? "primary" : "secondary"}
+                                        className="w-100"
+                                        onClick={() => {
+                                            setSelectedItem(item);
+                                            setShowModal(true);
+                                        }}
+                                        disabled={item.quantity === 0 || item.status !== 'active'}
+                                    >
+                                        <Cart className="me-2" />
+                                        {item.quantity > 0 && item.status === 'active' ? "Vender" : "Indisponível"}
+                                    </Button>
+                                    <Button
+                                        variant="info"
                                         className="w-100 mt-2"
                                         onClick={() => {
                                             setSelectedItem(item);
-                                            setShowCloseModal(true);
+                                            setShowEditStockModal(true);
                                         }}
                                         disabled={item.status !== 'active'}
                                     >
-                                        Fechar Item
+                                        <Box className="me-2" />
+                                        Atualizar Estoque
                                     </Button>
-                                </ShowIfAdmin>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                ))}
-            </Row>
+                                    <ShowIfAdmin>
+                                        <Button
+                                            variant= "warning"
+                                            className="w-100 mt-2"
+                                            onClick={() => {
+                                                setSelectedItem(item);
+                                                setShowCloseModal(true);
+                                            }}
+                                            disabled={item.status !== 'active'}
+                                        >
+                                            Fechar Item
+                                        </Button>
+                                    </ShowIfAdmin>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    ))}
+                </Row>
+            )}
+
+
 
             {selectedItem && (
                 <>
