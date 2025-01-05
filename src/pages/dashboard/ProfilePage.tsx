@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from 'hooks/useAuth';
+import {useAuth, User} from 'hooks/useAuth';
 import { Container, Row, Col, Card, Form, Button, Alert, ListGroup } from 'react-bootstrap';
 import ShowIfAdmin from "components/auth/admin/show_if_admin.tsx";
-
-interface User {
-    id: string;
-    username: string;
-    role: string;
-}
 
 const ProfileManagement: React.FC = () => {
     const { user, isAdmin, getUsers, changeUserRole, changePassword, deleteUser } = useAuth();
@@ -26,7 +20,7 @@ const ProfileManagement: React.FC = () => {
 
     const loadUsers = async () => {
         try {
-            const userList = await getUsers();
+            const userList: User[] = await getUsers();
             setUsers(userList);
         } catch {
             setError('Falha ao carregar os usuários');

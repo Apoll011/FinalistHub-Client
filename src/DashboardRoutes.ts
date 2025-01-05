@@ -22,6 +22,12 @@ export const DashboardMenu: DashboardMenuProps[] = [
   },
   {
     id: uuid(),
+    title: "Venda de items solo",
+    icon: "box",
+    link: "/standalone",
+  },
+  {
+    id: uuid(),
     title: 'Finanças',
     icon: 'dollar-sign',
     admin: true,

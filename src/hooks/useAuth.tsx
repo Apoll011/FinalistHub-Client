@@ -1,7 +1,7 @@
 import {createContext, useContext} from "react";
 
 export interface User {
-    id: string;
+    id: number;
     username: string;
     role: string;
     token: string;

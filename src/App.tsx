@@ -19,6 +19,7 @@ import TransactionsPage from "pages/dashboard/finance/TransactionsPage.tsx";
 import CategorySpendingAnalysisComponent from "pages/dashboard/finance/CategorySpendingAnalysisPage.tsx";
 import AccountsPage from "pages/dashboard/finance/AccountsPage.tsx";
 import TransactionReceiptPage from "pages/dashboard/finance/TransactionReceiptPage.tsx";
+import StandaloneSalesPage from "pages/dashboard/StandaloneItemsPage.tsx";
 
 const AuthenticationLayout = React.lazy(() => import("layouts/AuthenticationLayout"));
 const RootLayout = React.lazy(() => import("layouts/RootLayout"));
@@ -171,8 +172,14 @@ const App = () => {
           Component: TicketSalesPage,
         },
         {
+          id: "profile",
           path: '/profile',
           element: <ProfileManagement />
+        },
+        {
+          id: "standalone",
+          path: '/standalone',
+          element: <StandaloneSalesPage />
         }
       ],
     },

@@ -107,7 +107,7 @@ const Sidebar: React.FC<SidebarProps> = ({ showMenu, toggleMenu }) => {
                                           <ListGroup as="ul" bsPrefix="" className="nav flex-column">
                                             {menuLevel1Item.children.map((menuLevel2Item, menuLevel2Index) => {
                                               return (
-                                                  <ListGroup.Item key={menuLevel2Index} as="li" bsPrefix="nav-item">
+                                                  <ListGroup.Item key={menuLevel2Item.id} as="li" bsPrefix="nav-item">
                                                     {generateLink(menuLevel2Item)}
                                                   </ListGroup.Item>
                                               );
