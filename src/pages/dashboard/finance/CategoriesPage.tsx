@@ -138,7 +138,7 @@ const CategoriesPage = () => {
             await apiFunctions.deleteCategory(id);
             fetchCategories();
         } catch {
-            setError('Não é possivel deletar esta categoria pois ele é usada.');
+            setError('Não é possivel apagar esta categoria pois ele é usada.');
         } finally {
             setLoading(false);
         }

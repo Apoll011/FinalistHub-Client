@@ -136,12 +136,10 @@ const ProfileManagement: React.FC = () => {
                                 </Row>
                             </Form>
 
-                            {/* Seção de Admin */}
                             <ShowIfAdmin>
                                 <div className="mt-4">
                                     <h3 className="h5 mb-3">Gestão de Usuários</h3>
 
-                                    {/* Gerenciamento de Funções */}
                                     <Form onSubmit={handleChangeRole} className="mb-4">
                                         <Row className="align-items-end g-2">
                                             <Col xs={12} sm={4}>
@@ -215,7 +213,7 @@ const ProfileManagement: React.FC = () => {
                     {user && (
                         <Card className="mt-4">
                             <Card.Header>
-                                <Card.Title>Deletar Perfil</Card.Title>
+                                <Card.Title>Apagar Perfil</Card.Title>
                             </Card.Header>
                             <Card.Body className="d-flex align-items-center align-content-end justify-content-end">
                                 <Button
@@ -224,7 +222,7 @@ const ProfileManagement: React.FC = () => {
 
                                     onClick={() => handleDeleteUser(user.username)}
                                 >
-                                    Deletar Conta
+                                    Apagar Conta
                                 </Button>
                             </Card.Body>
                         </Card>

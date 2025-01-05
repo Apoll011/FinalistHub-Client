@@ -26,13 +26,13 @@
 
 ---
 
-## Overview ✨
+## Overview
 
 FinalistHub-Client is the frontend interface for interacting with FinalistHub's event management and financial services. Built using TypeScript and React, it enables users to manage a wide range of data, including events, financial transactions, and inventory reports. It provides dashboards, charts, and insights to track real-time business activities effectively.
 
 ---
 
-## Features 🌟
+## Features
 
 - **Event Management**: Organize and manage events, view event details, and track ticket sales.
 - **Financial Dashboard**: View financial reports, cashflow forecasts, and transaction data.
@@ -45,7 +45,7 @@ FinalistHub-Client is the frontend interface for interacting with FinalistHub's 
 
 ---
 
-## Project Structure 📂
+## Project Structure
 
 ```
 └── FinalistHub-Client/
@@ -79,7 +79,7 @@ FinalistHub-Client is the frontend interface for interacting with FinalistHub's 
 
 ---
 
-## Project Index 📚
+## Project Index
 
 - **src/**: Contains all TypeScript source code, including components, pages, hooks, and APIs.
 - **public/**: Static assets like images, icons, and manifests.
@@ -88,7 +88,7 @@ FinalistHub-Client is the frontend interface for interacting with FinalistHub's 
 
 ---
 
-## Getting Started 🚀
+## Getting Started
 
 ### Prerequisites
 
@@ -125,7 +125,7 @@ Before getting started with **FinalistHub-Client**, ensure your environment meet
 
 ---
 
-## Usage 🖥️
+## Usage
 
 Run FinalistHub-Client in your local environment:
 
@@ -141,7 +141,7 @@ Run FinalistHub-Client in your local environment:
 
 ---
 
-## Testing 🧪
+## Testing
 
 Run the test suite using **npm**:
 
@@ -151,7 +151,7 @@ npm test
 
 ---
 
-## Project Roadmap 🛠️
+## Project Roadmap
 
 Here are some key features and tasks we're planning for the future:
 
@@ -161,7 +161,7 @@ Here are some key features and tasks we're planning for the future:
 
 ---
 
-## Contributing 🤝
+## Contributing
 
 We welcome contributions to **FinalistHub-Client**! Here’s how you can get involved:
 
@@ -178,9 +178,9 @@ We welcome contributions to **FinalistHub-Client**! Here’s how you can get inv
 
 ---
 
-## License 📜
+## License
 
-This project is licensed under the **SELECT-A-LICENSE** License. For more details, please refer to the LICENSE file in the repository.
+This project is licensed under the MIT License. For more details, please refer to the LICENSE file in the repository.
 
 ---
 

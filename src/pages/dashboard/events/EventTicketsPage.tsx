@@ -4,7 +4,6 @@ import { Cart, CurrencyDollar, People, Tag, Lightning } from 'react-bootstrap-ic
 import { SalesApi, TicketAvailability, TicketSaleCreate } from "api";
 import { useParams } from "react-router-dom";
 
-// Queue for processing sales
 class SalesQueue {
     private queue: TicketSaleCreate[] = [];
     private processing = false;
@@ -126,7 +125,8 @@ const TicketSalesPage = () => {
     const [selectedTicket, setSelectedTicket] = useState<TicketAvailability|null>(null);
     const [showModal, setShowModal] = useState(false);
     const [notifications, setNotifications] = useState<Notification[]>([]);
-    const [isQuickMode, setIsQuickMode] = useState(false); // Novo estado
+    const [isQuickMode, setIsQuickMode] = useState(false);
+    const [canSale, setCanSale] = useState(true);
     const { eventId } = useParams();
 
     const addNotification = (message: string, variant: string) => {
@@ -171,6 +171,13 @@ const TicketSalesPage = () => {
             () => handleSaleSuccess(),
             (error) => addNotification(`Erro na venda: ${error}`, "danger")
         );
+    };
+
+    const timeout = () => {
+        setCanSale(false);
+        setTimeout(() => {
+            setCanSale(true);
+        }, 500);
     };
 
     return (
@@ -236,13 +243,14 @@ const TicketSalesPage = () => {
                                     className="w-100"
                                     onClick={() => {
                                         if (isQuickMode) {
+                                            timeout();
                                             handleQuickSale(ticket);
                                         } else {
                                             setSelectedTicket(ticket);
                                             setShowModal(true);
                                         }
                                     }}
-                                    disabled={!ticket.available}
+                                    disabled={!ticket.available || !canSale}
                                 >
                                     <Cart className="me-2" />
                                     {ticket.available ? (isQuickMode ? "Venda Rápida" : "Vender") : "Indisponível"}

@@ -76,10 +76,10 @@ export const MeetingManagement = () => {
         if (window.confirm('Tems certeza que queres apaga está reunião?')) {
             try {
                 await MeetingApi.deleteMeeting(meetingId);
-                setAlert({ show: true, message: 'Reunião deletada com sucesso!', variant: 'success' });
+                setAlert({ show: true, message: 'Reunião apagada com sucesso!', variant: 'success' });
                 loadData().then(() => console.log("Loaded meetings."));
             } catch {
-                setAlert({ show: true, message: 'Erro deletando a reunião!', variant: 'danger' });
+                setAlert({ show: true, message: 'Erro apagando a reunião!', variant: 'danger' });
             }
         }
     };
