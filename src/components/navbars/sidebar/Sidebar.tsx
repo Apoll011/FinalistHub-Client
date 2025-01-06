@@ -50,7 +50,7 @@ const Sidebar: React.FC<SidebarProps> = ({ showMenu, toggleMenu }) => {
 
   return (
       <Fragment>
-        <SimpleBar style={{ maxHeight: "100vh" }}>
+        <SimpleBar style={{ maxHeight: "100vh", maxWidth: "100vw" }} className="w-auto overflow-x-hidden">
           <div className="nav-scroller">
             <Link to="/" className="navbar-brand">
               <Image src="/images/logo.png" style={{ height: 3.75 + "rem" }} alt="" />

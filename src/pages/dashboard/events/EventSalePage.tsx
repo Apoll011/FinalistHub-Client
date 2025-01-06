@@ -43,7 +43,6 @@ const salesQueue = new SalesQueue();
 const SaleApi = {
     sellStockItem: (data: SaleCreate) => new SalesApi().sellStockItemSalesStockItemsPost({saleCreate: data}),
     registerItem: (id: string, data: ItemCreate) => new EventsApi().addEventItemsEventsEventIdItemsPost({eventId: id, itemCreate: data}),
-    createBulkSale: (data: SaleCreate[]) => new SalesApi().createBulkSaleSalesBulkSalePost({saleCreate: data}),
     getEventItems: (eventId: string) => new EventsApi().getEventItemsEventsEventIdItemsGet({eventId: eventId}),
     updateItemQuantity: (itemId: string, quantity: number) =>
         new EventsApi().updateItemQuantityEventsItemsItemIdQuantityPut({

@@ -1,12 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Form, Button, Table, Modal, Card, Spinner, Alert, Col, Row } from 'react-bootstrap';
+import React, {useState, useMemo} from 'react';
+import {Form, Button, Modal, Card, Spinner, Alert, Col, Row} from 'react-bootstrap';
 import {
     CategoriesApi,
     CategoryUsageResponse,
-    ListCategoriesCategoriesGetRequest,
-    TransactionCategoryCreate,
     TransactionCategoryResponse,
-    TransactionResponse
 } from 'api';
 import { Line } from 'react-chartjs-2';
 import {
@@ -20,6 +17,8 @@ import {
     LineElement,
     PointElement
 } from 'chart.js';
+import {useCategories} from "hooks/useCategories.tsx";
+import {CategoryGrid} from "components/financial/CategoryCard.tsx";
 
 ChartJS.register(
     CategoryScale,
@@ -32,371 +31,323 @@ ChartJS.register(
     PointElement
 );
 
-const apiFunctions = {
-    createCategory: async (data: TransactionCategoryCreate) => new CategoriesApi().createCategoryCategoriesPost({ transactionCategoryCreate: data }),
-    listCategories: async (params: ListCategoriesCategoriesGetRequest | undefined) => new CategoriesApi().listCategoriesCategoriesGet(params),
-    updateCategory: async (id: string, data: TransactionCategoryCreate) => new CategoriesApi().updateCategoryCategoriesCategoryIdPut({ categoryId: id, transactionCategoryCreate: data }),
-    deleteCategory: async (id: string) => new CategoriesApi().deleteCategoryCategoriesCategoryIdDelete({ categoryId: id }),
-    getCategoryUsage: async (categoryId: string) =>
-        new CategoriesApi().getCategoryUsageCategoriesCategoryIdUsageGet({ categoryId: categoryId }),
+const CategoryForm: React.FC<{
+    initialData?: TransactionCategoryResponse;
+    onSubmit: (data: Omit<TransactionCategoryResponse, 'id'>) => Promise<void>;
+    loading?: boolean;
+}> = ({ initialData, onSubmit, loading }) => {
+    const [formData, setFormData] = useState({
+        name: initialData?.name || '',
+        description: initialData?.description || '',
+    });
+    
+    return (
+        <Form onSubmit={async (e) => {
+            e.preventDefault();
+            await onSubmit(formData);
+        }}>
+            <Form.Group className="mb-3">
+                <Form.Label>Nome</Form.Label>
+                <Form.Control
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        name: e.target.value
+                    }))}
+                    required
+                />
+            </Form.Group>
+            
+            <Form.Group className="mb-3">
+                <Form.Label>Descrição</Form.Label>
+                <Form.Control
+                    as="textarea"
+                    rows={3}
+                    value={formData.description}
+                    onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        description: e.target.value
+                    }))}
+                    required
+                />
+            </Form.Group>
+            
+            <div className="d-grid">
+                <Button type="submit" disabled={loading}>
+                    {loading ? (
+                        <Spinner animation="border" size="sm" />
+                    ) : (
+                        'Salvar'
+                    )}
+                </Button>
+            </div>
+        </Form>
+    );
 };
 
-const CategoriesPage = () => {
-    const [categories, setCategories] = useState<TransactionCategoryResponse[]>([]);
-    const [newCategory, setNewCategory] = useState({ name: '', description: '' });
-    const [selectedCategory, setSelectedCategory] = useState<TransactionCategoryResponse | null>(null);
-    const [showModal, setShowModal] = useState(false);
-    const [showEditModal, setShowEditModal] = useState(false);
-    const [showAddModal, setShowAddModal] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [categoryUsageData, setCategoryUsageData] = useState<CategoryUsageResponse | null>(null);
-
-    useEffect(() => {
-        fetchCategories();
-    }, []);
-
-    const getTransactionsByDay = (transactions: Array<TransactionResponse>) => {
-        const dailyData: Record<string, number> = {};
-
-        transactions.forEach((transaction) => {
-            const date = new Date(transaction.createdAt).toLocaleDateString();
-            dailyData[date] = (dailyData[date] || 0) + 1;
-        });
-
-        const sortedDates = Object.keys(dailyData).sort(
-            (a, b) => new Date(a).getTime() - new Date(b).getTime()
-        );
-
-        return {
-            labels: sortedDates,
-            data: sortedDates.map((date) => dailyData[date]),
-        };
-    };
-
-    const transactionsByDay = categoryUsageData
-        ? getTransactionsByDay(categoryUsageData.transactions)
-        : { labels: [], data: [] };
-
-    const fetchCategories = async () => {
-        setLoading(true);
-        try {
-            const response = await apiFunctions.listCategories({ skip: 0, limit: 100 });
-            setCategories(response || []);
-        } catch {
-            setError('Failed to fetch categories. Please try again later.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleCreateCategory = async () => {
-        if (!newCategory.name || !newCategory.description) return;
-
-        try {
-            setLoading(true);
-            await apiFunctions.createCategory(newCategory);
-            setNewCategory({ name: '', description: '' });
-            setShowAddModal(false);
-            fetchCategories();
-        } catch {
-            setError('Failed to create category. Please try again.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
+const StatsDisplay: React.FC<{
+    usage: CategoryUsageResponse;
+}> = ({ usage }) => {
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('pt-PT', {
             style: 'currency',
             currency: 'CVE'
         }).format(amount);
     };
+    
+    const chartData = useMemo(() => {
+        const dailyData: Record<string, number> = {};
+        usage.transactions.forEach((transaction) => {
+            const date = new Date(transaction.createdAt).toLocaleDateString();
+            dailyData[date] = (dailyData[date] || 0) + 1;
+        });
+        
+        const sortedDates = Object.keys(dailyData).sort(
+            (a, b) => new Date(a).getTime() - new Date(b).getTime()
+        );
+        
+        return {
+            labels: sortedDates,
+            datasets: [{
+                label: 'Transações por Dia',
+                data: sortedDates.map(date => dailyData[date]),
+                fill: false,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.4)',
+                tension: 0.2,
+            }],
+        };
+    }, [usage.transactions]);
+    
+    return (
+        <div>
+            <Row className="g-4 mb-4">
+                <Col md={6}>
+                    <Card className="h-100">
+                        <Card.Body>
+                            <Card.Title>Total de Transações</Card.Title>
+                            <h3 className="mb-0">{usage.totalTransactions}</h3>
+                        </Card.Body>
+                    </Card>
+                </Col>
+                <Col md={6}>
+                    <Card className="h-100">
+                        <Card.Body>
+                            <Card.Title>Última Utilização</Card.Title>
+                            <h3 className="mb-0">
+                                {usage.lastUsed ? new Date(usage.lastUsed).toLocaleDateString() : 'Nunca'}
+                            </h3>
+                        </Card.Body>
+                    </Card>
+                </Col>
+                <Col md={6}>
+                    <Card className="h-100">
+                        <Card.Body>
+                            <Card.Title>Total</Card.Title>
+                            <h3 className="mb-0">{formatCurrency(usage.totalAmount)}</h3>
+                        </Card.Body>
+                    </Card>
+                </Col>
+                <Col md={6}>
+                    <Card className="h-100">
+                        <Card.Body>
+                            <Card.Title>Média por Transação</Card.Title>
+                            <h3 className="mb-0">{formatCurrency(usage.averageAmount)}</h3>
+                        </Card.Body>
+                    </Card>
+                </Col>
+            </Row>
+            
+            <Card>
+                <Card.Body>
+                    <Card.Title>Histórico de Transações</Card.Title>
+                    <Line
+                        data={chartData}
+                        options={{
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                },
+                            },
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Data',
+                                    },
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Número de Transações',
+                                    },
+                                },
+                            },
+                        }}
+                    />
+                </Card.Body>
+            </Card>
+        </div>
+    );
+};
 
-    const handleEditCategory = async () => {
-        if (!selectedCategory?.id) return;
-
-        const response = await apiFunctions.updateCategory(selectedCategory.id, selectedCategory);
-        if (response) {
-            setShowEditModal(false);
-            fetchCategories();
-        }
-    };
-
-    const fetchCategoryUsage = async (categoryId: string) => {
+const CategoriesPage: React.FC = () => {
+    const { categories, loading, error, refetch } = useCategories();
+    const [selectedCategory, setSelectedCategory] = useState<TransactionCategoryResponse | null>(null);
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [showStatsModal, setShowStatsModal] = useState(false);
+    const [categoryUsage, setCategoryUsage] = useState<CategoryUsageResponse | null>(null);
+    const [actionLoading, setActionLoading] = useState(false);
+    
+    const handleCreateCategory = async (data: Omit<TransactionCategoryResponse, 'id'>) => {
         try {
-            const response = await apiFunctions.getCategoryUsage(categoryId);
-            setCategoryUsageData(response);
-        } catch {
-            setError('Failed to fetch category usage data. Please try again.');
+            setActionLoading(true);
+            await new CategoriesApi().createCategoryCategoriesPost({
+                transactionCategoryCreate: data
+            });
+            await refetch();
+            setShowAddModal(false);
+        } catch (error) {
+            console.error('Failed to create category:', error);
+        } finally {
+            setActionLoading(false);
         }
     };
-
+    
+    const handleUpdateCategory = async (data: Omit<TransactionCategoryResponse, 'id'>) => {
+        if (!selectedCategory) return;
+        
+        try {
+            setActionLoading(true);
+            await new CategoriesApi().updateCategoryCategoriesCategoryIdPut({
+                categoryId: selectedCategory.id,
+                transactionCategoryCreate: data
+            });
+            await refetch();
+            setShowEditModal(false);
+        } catch (error) {
+            console.error('Failed to update category:', error);
+        } finally {
+            setActionLoading(false);
+        }
+    };
+    
     const handleDeleteCategory = async (id: string) => {
         try {
-            setLoading(true);
-            await apiFunctions.deleteCategory(id);
-            fetchCategories();
-        } catch {
-            setError('Não é possivel apagar esta categoria pois ele é usada.');
+            setActionLoading(true);
+            await new CategoriesApi().deleteCategoryCategoriesCategoryIdDelete({
+                categoryId: id
+            });
+            await refetch();
+        } catch (error) {
+            console.error('Failed to delete category:', error);
         } finally {
-            setLoading(false);
+            setActionLoading(false);
         }
     };
-
-    const CategoryClick = async (categoryId: string) => {
+    
+    const handleViewStats = async (category: TransactionCategoryResponse) => {
         try {
-            setLoading(true);
-            await fetchCategoryUsage(categoryId);
-            setShowModal(true);
-        } catch {
-            setError('Failed to update category. Please try again.');
+            setActionLoading(true);
+            const usage = await new CategoriesApi().getCategoryUsageCategoriesCategoryIdUsageGet({
+                categoryId: category.id
+            });
+            setCategoryUsage(usage);
+            setSelectedCategory(category);
+            setShowStatsModal(true);
+        } catch (error) {
+            console.error('Failed to fetch category usage:', error);
         } finally {
-            setLoading(false);
+            setActionLoading(false);
         }
     };
-
+    
     return (
-        <div className="container mt-4">
+        <div className="container py-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h1>Categorias</h1>
-                <Button variant="primary" onClick={() => setShowAddModal(true)}>
+                <Button
+                    variant="primary"
+                    onClick={() => setShowAddModal(true)}
+                    disabled={loading || actionLoading}
+                >
                     Adicionar Categoria
                 </Button>
             </div>
-
-            {error && <Alert variant="danger">{error}</Alert>}
-
-            <div className="table-responsive rounded-3 rounded-bottom-3">
-                <Table hover>
-                    <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>Descrição</th>
-                        <th>Ações</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {categories.map((category) => (
-                        <tr key={category.id}>
-                            <td className="w-25">{category.name}</td>
-                            <td className="w-25">{category.description}</td>
-                            <td className="w-25">
-                                <Button
-                                    variant="warning"
-                                    className="me-2"
-                                    onClick={() => CategoryClick(category.id)}
-                                >
-                                    {loading ? <Spinner animation="border" size="sm" /> : 'Estatísticas'}
-                                </Button>
-                                <Button
-                                    variant="warning"
-                                    className="me-2"
-                                    onClick={() => {
-                                        setSelectedCategory(category);
-                                        setShowEditModal(true);
-                                    }}
-                                >
-                                    {loading ? <Spinner animation="border" size="sm" /> : 'Editar'}
-                                </Button>
-                                <Button
-                                    variant="danger"
-                                    onClick={() => handleDeleteCategory(category.id)}
-                                >
-                                    {loading ? <Spinner animation="border" size="sm" /> : 'Apagar'}
-                                </Button>
-                            </td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </Table>
-            </div>
-
-            {/* Add Category Modal */}
+            
+            {error && (
+                <Alert variant="danger" className="mb-4">
+                    {error}
+                </Alert>
+            )}
+            
+            {loading ? (
+                <div className="text-center py-5">
+                    <Spinner animation="border" variant="primary" />
+                </div>
+            ) : (
+                <CategoryGrid
+                    categories={categories}
+                    onEdit={(category) => {
+                        setSelectedCategory(category);
+                        setShowEditModal(true);
+                    }}
+                    onDelete={handleDeleteCategory}
+                    onViewStats={handleViewStats}
+                    loading={actionLoading}
+                />
+            )}
+            
             <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Adicionar Nova Categoria</Modal.Title>
+                    <Modal.Title>Nova Categoria</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Nome</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Nome da Categoria"
-                                value={newCategory.name}
-                                onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Descrição</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Descrição"
-                                value={newCategory.description}
-                                onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
-                            />
-                        </Form.Group>
-                    </Form>
+                    <CategoryForm
+                        onSubmit={handleCreateCategory}
+                        loading={actionLoading}
+                    />
                 </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowAddModal(false)}>
-                        Cancelar
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={handleCreateCategory}
-                        disabled={!newCategory.name || !newCategory.description || loading}
-                    >
-                        {loading ? <Spinner animation="border" size="sm" /> : 'Criar categoria'}
-                    </Button>
-                </Modal.Footer>
             </Modal>
-
-            {/* Edit Category Modal */}
-            {selectedCategory && (
-                <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Editar {selectedCategory.name}</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <Form>
-                            <Form.Group>
-                                <Form.Label>Nome</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={selectedCategory.name}
-                                    onChange={(e) =>
-                                        setSelectedCategory({ ...selectedCategory, name: e.target.value })
-                                    }
-                                />
-                            </Form.Group>
-                            <Form.Group>
-                                <Form.Label>Descrição</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={selectedCategory.description as string}
-                                    onChange={(e) =>
-                                        setSelectedCategory({ ...selectedCategory, description: e.target.value })
-                                    }
-                                />
-                            </Form.Group>
-                        </Form>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" disabled={loading} onClick={() => setShowEditModal(false)}>
-                            Cancelar
-                        </Button>
-                        <Button variant="primary" disabled={loading} onClick={handleEditCategory}>
-                            {loading ? <Spinner animation="border" size="sm" /> : 'Salvar'}
-                        </Button>
-                    </Modal.Footer>
-                </Modal>
-            )}
-
-            {/* Category Usage Modal */}
-            <Modal show={showModal} onHide={() => {
-                setShowModal(false);
-                setCategoryUsageData(null);
-                setSelectedCategory(null);
-            }} size="lg">
+            
+            <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Estatísticas de Uso: {selectedCategory?.name}</Modal.Title>
+                    <Modal.Title>Editar Categoria</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {categoryUsageData ? (
-                        <div>
-                            <Row className="mb-3">
-                                <Col md={6}>
-                                    <Card>
-                                        <Card.Body>
-                                            <h6>Total de Transações</h6>
-                                            <p>{categoryUsageData.totalTransactions}</p>
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
-                                <Col md={6}>
-                                    <Card>
-                                        <Card.Body>
-                                            <h6>Última Utilização</h6>
-                                            <p>{categoryUsageData.lastUsed ? new Date(categoryUsageData.lastUsed).toLocaleDateString() : 'Nunca'}</p>
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
-                                <Col md={6}>
-                                    <Card>
-                                        <Card.Body>
-                                            <h6>Total</h6>
-                                            <p>{formatCurrency(categoryUsageData.totalAmount)}</p>
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
-                                <Col md={6}>
-                                    <Card>
-                                        <Card.Body>
-                                            <h6>Média</h6>
-                                            <p>{formatCurrency(categoryUsageData.averageAmount)}</p>
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col>
-                                    <Line
-                                        data={{
-                                            labels: transactionsByDay.labels,
-                                            datasets: [
-                                                {
-                                                    label: 'Total de Transações por Dia',
-                                                    data: transactionsByDay.data,
-                                                    fill: false,
-                                                    borderColor: 'rgba(75, 192, 192, 1)',
-                                                    backgroundColor: 'rgba(75, 192, 192, 0.4)',
-                                                    tension: 0.2,
-                                                },
-                                            ],
-                                        }}
-                                        options={{
-                                            responsive: true,
-                                            plugins: {
-                                                legend: {
-                                                    display: true,
-                                                    position: 'top',
-                                                },
-                                            },
-                                            scales: {
-                                                x: {
-                                                    title: {
-                                                        display: true,
-                                                        text: 'Dias',
-                                                    },
-                                                },
-                                                y: {
-                                                    beginAtZero: true,
-                                                    title: {
-                                                        display: true,
-                                                        text: 'Transações',
-                                                    },
-                                                },
-                                            },
-                                        }}
-                                    />
-                                </Col>
-                            </Row>
-                        </div>
-                    ) : (
-                        <Spinner animation="border" />
+                    {selectedCategory && (
+                        <CategoryForm
+                            initialData={selectedCategory}
+                            onSubmit={handleUpdateCategory}
+                            loading={actionLoading}
+                        />
                     )}
                 </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => {
-                        setShowModal(false);
-                        setCategoryUsageData(null);
-                        setSelectedCategory(null);
-                    }}>
-                        Fechar
-                    </Button>
-                </Modal.Footer>
+            </Modal>
+            
+            <Modal
+                show={showStatsModal}
+                onHide={() => setShowStatsModal(false)}
+                size="lg"
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>
+                        Estatísticas: {selectedCategory?.name}
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {actionLoading ? (
+                        <div className="text-center py-4">
+                            <Spinner animation="border" />
+                        </div>
+                    ) : categoryUsage ? (
+                        <StatsDisplay usage={categoryUsage} />
+                    ) : null}
+                </Modal.Body>
             </Modal>
         </div>
     );

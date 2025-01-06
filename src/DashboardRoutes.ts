@@ -32,16 +32,10 @@ export const DashboardMenu: DashboardMenuProps[] = [
     icon: 'dollar-sign',
     admin: true,
     children: [
-      { id: uuid(), link: '/finance/categories', name: 'Categorias' },
       {
         id: uuid(),
-        link: "/finance/transation/list/transfer",
-        name: "Movimentação",
-      },
-      {
-        id: uuid(),
-        link: "/finance/analysis/spending",
-        name: "Analise dos Gastos",
+        link: "/finance/accounts/list/",
+        name: "Contas",
       },
       {
         id: uuid(),
@@ -50,8 +44,18 @@ export const DashboardMenu: DashboardMenuProps[] = [
       },
       {
         id: uuid(),
-        link: "/finance/accounts/list/",
-        name: "Contas",
+        link: '/finance/categories',
+        name: 'Categorias'
+      },
+      {
+        id: uuid(),
+        link: "/finance/transation/list/transfer",
+        name: "Movimentação entre contas",
+      },
+      {
+        id: uuid(),
+        link: "/finance/analysis/spending",
+        name: "Analise dos Gastos",
       },
       {
         id: uuid(),
