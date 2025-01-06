@@ -20,6 +20,8 @@ import CategorySpendingAnalysisComponent from "pages/dashboard/finance/CategoryS
 import AccountsPage from "pages/dashboard/finance/AccountsPage.tsx";
 import TransactionReceiptPage from "pages/dashboard/finance/TransactionReceiptPage.tsx";
 import StandaloneSalesPage from "pages/dashboard/StandaloneItemsPage.tsx";
+import {AdminRoute, ProtectedRoute} from "components/auth/routes.tsx";
+import {LoadingSpinner} from "components/LoadingSpinner.tsx";
 
 const AuthenticationLayout = React.lazy(() => import("layouts/AuthenticationLayout"));
 const RootLayout = React.lazy(() => import("layouts/RootLayout"));
@@ -28,45 +30,6 @@ const SignIn = React.lazy(() => import("./pages/auth/SignIn"));
 const SignUp = React.lazy(() => import("pages/auth/SignUp"));
 const Dashboard = React.lazy(() => import("pages/dashboard/Index"));
 const NotFound = React.lazy(() => import("pages/dashboard/pages/NotFound"));
-
-
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-}
-
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return <LoadingSpinner />;
-  }
-
-  if (!user) {
-    return <Navigate to="/auth/sign-in" />;
-  }
-
-  return <>{children}</>;
-};
-
-export const AdminRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, loading, isAdmin } = useAuth();
-
-  if (loading) {
-    return <LoadingSpinner />;
-  }
-
-  if (!user || !isAdmin) {
-    return <Navigate to="/" />;
-  }
-
-  return <>{children}</>;
-};
-
-const LoadingSpinner = () => (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-      <HashLoader />
-    </div>
-);
 
 const App = () => {
   const router = createBrowserRouter([
@@ -201,7 +164,7 @@ const App = () => {
       ],
     },
   ]);
-
+  
   return (
       <AuthProvider>
         <Suspense fallback={<LoadingSpinner />}>
