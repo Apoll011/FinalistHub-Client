@@ -4,7 +4,7 @@ import React, {useEffect, useState} from "react";
 import { useAuth } from 'hooks/useAuth';
 import { useMounted } from "hooks/useMounted";
 import { Modal } from 'react-bootstrap';
-import {EventsApi} from "api";
+import {useProfilePicture} from "hooks/useProfilePicture.tsx";
 
 const SignUp = () => {
   const hasMounted = useMounted();
@@ -21,23 +21,21 @@ const SignUp = () => {
   const [loading, setLoading] = useState(false);
 
   const [show, setShow] = useState(false);
-
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-
-
-
+  
   const [username, setUsername] = useState('');
-  const [profileImage, setProfileImage] = useState('');
-
+  
   const [authenticatedAsAdmin, setAuthenticated] = useState(false);
   const [authError, setAuthError] = useState(false);
-
+  
   const [showAuth, setShowAuth] = useState(false);
-
+  
+  const profileImage = useProfilePicture(username);
+  
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+  
   const handleAuthClose = () => setShowAuth(false);
   const handleAuthShow = () => setShowAuth(true);
-
 
   const handleAuthSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -52,25 +50,12 @@ const SignUp = () => {
       setAuthError(true);
     }
   };
-
-
-
-  useEffect(() => {
-    if (username) {
-      const generatedImage = getProfileImage(username);
-      setProfileImage(generatedImage);
-    }
-  }, [username]);
-
+  
   const handleUserInputChange = (e:  React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | HTMLFormElement>) => {
     const { value } = e.target as HTMLFormElement;
     setUsername(value);
   };
-
-  const getProfileImage = (username: string) => {
-    return `https://api.multiavatar.com/${username.toLowerCase()}.svg`;
-  };
-
+  
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | HTMLFormElement>) => {
     const { name, value, checked } = e.target as HTMLFormElement;
     setFormData((prev) => ({

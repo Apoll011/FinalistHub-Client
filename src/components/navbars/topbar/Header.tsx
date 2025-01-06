@@ -5,6 +5,7 @@ import { Navbar } from "react-bootstrap";
 import { useAuth } from 'hooks/useAuth';
 import React from "react";
 import {StarFill} from "react-bootstrap-icons";
+import {useProfilePicture} from "hooks/useProfilePicture.tsx";
 
 interface HeaderProps {
     toggleMenu: () => void;
@@ -13,12 +14,11 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ toggleMenu }) => {
     const { user, isAdmin, logout } = useAuth();
     const navigate = useNavigate();
+    
+    const profileImage = useProfilePicture(user?.username || "");
 
     const handleProfileClick = () => {
         navigate('/profile');
-    };
-    const getProfileImage = (username: string) => {
-        return `https://api.multiavatar.com/${username.toLowerCase()}.svg`; // Use um fundo aleatório & tamanho
     };
 
     return (
@@ -40,7 +40,7 @@ const Header: React.FC<HeaderProps> = ({ toggleMenu }) => {
                     {user && (
                         <div className="d-flex align-items-center gap-3">
                             <img
-                                src={getProfileImage(user.username)}
+                                src={profileImage}
                                 alt="Foto de Perfil"
                                 className="rounded-circle"
                                 width="30"

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {useAuth, User} from 'hooks/useAuth';
 import { Container, Row, Col, Card, Form, Button, Alert, ListGroup } from 'react-bootstrap';
 import ShowIfAdmin from "components/auth/admin/show_if_admin.tsx";
+import {useProfilePicture} from "hooks/useProfilePicture.tsx";
 
 const ProfileManagement: React.FC = () => {
     const { user, isAdmin, getUsers, changeUserRole, changePassword, deleteUser } = useAuth();
@@ -11,6 +12,8 @@ const ProfileManagement: React.FC = () => {
     const [selectedUser, setSelectedUser] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    
+    const profileImage = useProfilePicture(user?.username || "");
 
     useEffect(() => {
         if (isAdmin) {
@@ -62,9 +65,9 @@ const ProfileManagement: React.FC = () => {
             }
         }
     };
-
+    
     const getProfileImage = (username: string) => {
-        return `https://api.multiavatar.com/${username.toLowerCase()}.svg`; // Use um fundo aleatório & tamanho
+        return `https://api.multiavatar.com/${username.toLowerCase()}.svg`;
     };
 
     return (
@@ -78,7 +81,7 @@ const ProfileManagement: React.FC = () => {
                             </Card.Header>
                             <Card.Body className="d-flex align-items-center">
                                 <img
-                                    src={getProfileImage(user.username)}
+                                    src={profileImage}
                                     alt="Foto de Perfil"
                                     className="rounded-circle me-3"
                                     width="100"
