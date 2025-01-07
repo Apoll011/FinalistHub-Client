@@ -3,6 +3,8 @@ import {Card, ListGroup, Badge, Row, Col} from 'react-bootstrap';
 import {useNavigate} from 'react-router-dom';
 import {ArrowUp, ArrowDown, ArrowLeftRight} from 'react-bootstrap-icons';
 import {FinanceApi, TransactionResponse} from 'api';
+import {formatCurrency} from "utils/currency.ts";
+import {useAccountNames} from "hooks/useAccountNames.ts";
 
 interface TransactionsListProps {
     transactions: TransactionResponse[]
@@ -10,8 +12,6 @@ interface TransactionsListProps {
 
 const TransactionsList: React.FC<TransactionsListProps> = ({transactions }) => {
     const navigate = useNavigate();
-    const [accountNames, setAccountNames] = useState<{ [key: string]: string }>({}); // Cache account names
-    const [loadingAccounts, setLoadingAccounts] = useState<boolean>(true);
 
     const swappedTransactions = [...transactions].reverse();
 
@@ -25,7 +25,6 @@ const TransactionsList: React.FC<TransactionsListProps> = ({transactions }) => {
                 return <ArrowLeftRight className="text-white" size={24}/>;
         }
     };
-
     const getTransactionColor = (type: string) => {
         switch (type) {
             case 'revenue':
@@ -50,52 +49,10 @@ const TransactionsList: React.FC<TransactionsListProps> = ({transactions }) => {
     const handleTransactionClick = (id: string) => {
         navigate(`/finance/transactions/${id}`);
     };
-
-    const formatAmount = (amount: number) => {
-        return new Intl.NumberFormat('pt-PT', {
-            style: 'currency',
-            currency: 'CVE',
-        }).format(amount);
-    };
-
-    const fetchAccountName = async (accountId: string) => {
-        try {
-            const response = await new FinanceApi().getAccountBalanceFinanceAccountsAccountIdBalanceGet({accountId});
-            return response.name || 'Conta Desconhecida';
-        } catch (error) {
-            console.error(`Failed to fetch account name for ID: ${accountId}`, error);
-            return 'N/A';
-        }
-    };
-
-    const fetchAllAccountNames = async () => {
-        const uniqueAccountIds = Array.from(
-            new Set(transactions.flatMap((t) => [t.fromAccountId, t.toAccountId]))
-        );
-        const accountNamesMap: { [key: string]: string } = {};
-
-        await Promise.all(
-            uniqueAccountIds.map(async (accountId) => {
-                if(accountId) {
-                    accountNamesMap[accountId] = await fetchAccountName(accountId);
-                }
-            })
-        );
-
-        setAccountNames(accountNamesMap);
-        setLoadingAccounts(false);
-    };
-
-    const getName = (id: string | null | undefined) => {
-        if (id) {
-            return accountNames[id];
-        }
-        return 'Conta Desconhecida';
-    }
-
-    useEffect(() => {
-        fetchAllAccountNames();
-    }, [transactions]);
+    
+    const { isLoading: loadingAccounts, getAccountName } = useAccountNames(
+        transactions.flatMap(t => [t.fromAccountId, t.toAccountId])
+    );
 
     return (
         <Row className="g-4">
@@ -131,21 +88,21 @@ const TransactionsList: React.FC<TransactionsListProps> = ({transactions }) => {
                                     {transaction.description || 'Sem descrição'}
                                 </Card.Title>
                                 <Card.Subtitle className="mb-3 text-primary fw-bold fs-4">
-                                    {formatAmount(transaction.amount)}
+                                    {formatCurrency(transaction.amount)}
                                 </Card.Subtitle>
 
                                 <ListGroup variant="flush">
                                     <ListGroup.Item className="d-flex justify-content-between align-items-center">
                                         <span className="text-muted">De conta</span>
                                         <span className="fw-medium">
-                                            {getName(transaction.fromAccountId) || 'Loading...'}
+                                            {getAccountName(transaction.fromAccountId) || 'Loading...'}
                                         </span>
                                     </ListGroup.Item>
 
                                     <ListGroup.Item className="d-flex justify-content-between align-items-center">
                                         <span className="text-muted">Para a conta</span>
                                         <span className="fw-medium">
-                                            {getName(transaction.toAccountId) || 'Loading...'}
+                                            {getAccountName(transaction.toAccountId) || 'Loading...'}
                                         </span>
                                     </ListGroup.Item>
 

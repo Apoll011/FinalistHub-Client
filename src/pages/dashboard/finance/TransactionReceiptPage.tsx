@@ -4,24 +4,17 @@ import {AuthApi, CategoriesApi, EventsApi, FinanceApi, TransactionResponse} from
 import { Bank, CreditCard, Wallet } from 'react-bootstrap-icons';
 import {useParams} from "react-router-dom";
 import ReactDOMServer from "react-dom/server";
+import {formatCurrency} from "utils/currency.ts";
+import {useAccountNames} from "hooks/useAccountNames.ts";
+import {useUserName} from "hooks/useUsername.ts";
+import {useEventName} from "hooks/useEventName.ts";
+import {useCategoryName} from "hooks/useCategoryName.ts";
 
 interface TransactionCardProps {
     transaction: TransactionResponse
 }
 
 const TransactionCard: React.FC<TransactionCardProps> = ({transaction}) => {
-    const [entityNames, setEntityNames] = useState<{
-        accounts: { [key: string]: string };
-        category: string;
-        event: string;
-        user: string;
-    }>({
-        accounts: {},
-        category: '',
-        event: '',
-        user: ''
-    });
-
     const getTransactionColor = (type: string) => {
         switch (type) {
             case 'revenue':
@@ -70,106 +63,15 @@ const TransactionCard: React.FC<TransactionCardProps> = ({transaction}) => {
         };
     };
 
-    const formatAmount = (amount: number) => {
-        return new Intl.NumberFormat('pt-PT', {
-            style: 'currency',
-            currency: 'CVE',
-        }).format(amount);
-    };
 
-    const fetchEntityName = async (id: string | null | undefined) => {
-        if (!id) return null;
-        try {
-            const response = await new EventsApi().getEventDataEventsEventIdGet({eventId: id});
-            return response.name || null;
-        } catch (error) {
-            console.error(`Failed to fetch name for ID: ${id}`, error);
-            return null;
-        }
-    };
-    const fetchCategoryName = async (id: string | null | undefined) => {
-        if (!id) return null;
-        try {
-            const response = await new CategoriesApi().getCategoryCategoriesCategoryIdGet({categoryId: id});
-            return response.name || null;
-        } catch (error) {
-            console.error(`Failed to fetch name for ID: ${id}`, error);
-            return null;
-        }
-    };
-    const fetchUserName = async (id: string | null | undefined) => {
-        if (!id) return null;
-        try {
-            const response = await new AuthApi().getNameAuthNameGet({userId: id});
-            return response || null;
-        } catch (error) {
-            console.error(`Failed to fetch name for ID: ${id}`, error);
-            return null;
-        }
-    };
-    const fetchAccountName = async (id: string | null | undefined) => {
-        if (!id) return "N/A";
-        try {
-            const response = await new FinanceApi().getAccountBalanceFinanceAccountsAccountIdBalanceGet({accountId: id});
-            return response.name || 'Conta Desconhecida';
-        } catch (error) {
-            console.error(`Failed to fetch account name for ID: ${id}`, error);
-            return 'N/A';
-        }
-    };
-
-    const fetchAllNames = async () => {
-
-        try {
-            const [accountResults, categoryName, eventName, userName] = await Promise.all([
-                Promise.all(
-                    [transaction?.fromAccountId, transaction?.toAccountId]
-                        .filter(Boolean)
-                        .map(async (id) => ({
-                            id,
-                            name: await fetchAccountName(
-                                id
-                            )
-                        }))
-                ),
-                fetchCategoryName(
-                    transaction?.categoryId
-                ),
-                fetchEntityName(
-                    transaction?.eventId
-                ),
-                fetchUserName(
-                    transaction?.createdBy
-                )
-            ]);
-
-            const accountsMap = accountResults.reduce((acc, {id, name}) => {
-                if (id && name) acc[id] = name;
-                return acc;
-            }, {} as {[key: string]: string});
-
-            setEntityNames({
-                accounts: accountsMap,
-                category: categoryName || 'N/A',
-                event: eventName || 'N/A',
-                user: userName || 'N/A'
-            });
-        } catch (error) {
-            console.error('Error fetching names:', error);
-        }
-    };
-
-    useEffect(() => {
-        fetchAllNames();
-    }, [transaction]);
-
-    const getName = (id: string | null | undefined) => {
-        if (id) {
-            return entityNames.accounts[id];
-        }
-        return 'Conta Desconhecida';
-    }
-
+    const { getAccountName } = useAccountNames([
+        transaction?.fromAccountId,
+        transaction?.toAccountId
+    ]);
+    const { data: username } = useUserName(transaction?.createdBy);
+    const { data: categoryName } = useCategoryName(transaction?.categoryId);
+    const { data: eventName } = useEventName(transaction?.eventId);
+    
     const paymentMethod = getPaymentMethodInfo(transaction.paymentMethod);
 
     return (
@@ -182,7 +84,7 @@ const TransactionCard: React.FC<TransactionCardProps> = ({transaction}) => {
                     <Col md={6}>
                         <h5 className="text-muted mb-2">Informações Básicas</h5>
                         <p><strong>Tipo:</strong> {getTransactionName(transaction.type)}</p>
-                        <p><strong>Valor:</strong> {formatAmount(transaction.amount)}</p>
+                        <p><strong>Valor:</strong> {formatCurrency(transaction.amount)}</p>
                         <p className="d-flex align-items-center gap-2">
                             <strong>Método de Pagamento:</strong>
                             {paymentMethod.icon}
@@ -192,10 +94,10 @@ const TransactionCard: React.FC<TransactionCardProps> = ({transaction}) => {
                     </Col>
                     <Col md={6}>
                         <h5 className="text-muted mb-2">Detalhes da Conta</h5>
-                        <p><strong>Conta de Origem:</strong> {getName(transaction.fromAccountId) || 'N/A'}</p>
-                        <p><strong>Conta de Destino:</strong> {getName(transaction.toAccountId) || 'N/A'}</p>
-                        <p><strong>Categoria:</strong> {entityNames.category}</p>
-                        <p><strong>Evento:</strong> {entityNames.event}</p>
+                        <p><strong>Conta de Origem:</strong> {getAccountName(transaction.fromAccountId) || 'N/A'}</p>
+                        <p><strong>Conta de Destino:</strong> {getAccountName(transaction.toAccountId) || 'N/A'}</p>
+                        <p><strong>Categoria:</strong> {categoryName}</p>
+                        <p><strong>Evento:</strong> {eventName}</p>
                     </Col>
                 </Row>
 
@@ -210,7 +112,7 @@ const TransactionCard: React.FC<TransactionCardProps> = ({transaction}) => {
                 <Row>
                     <Col md={12}>
                         <h5 className="text-muted mb-2">Informações do Sistema</h5>
-                        <p><strong>Criado Por:</strong> {entityNames.user}</p>
+                        <p><strong>Criado Por:</strong> {username}</p>
                         <p><strong>Data de Criação:</strong> {new Date(transaction.createdAt).toLocaleString()}</p>
                         <p><strong>Última Atualização:</strong> {new Date(transaction.updatedAt).toLocaleString()}</p>
                     </Col>
