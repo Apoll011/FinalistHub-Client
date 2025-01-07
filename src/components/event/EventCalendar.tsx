@@ -1,6 +1,4 @@
-import {ErrorState, LoadingState, useApiData} from "hooks/useApiData.tsx";
-import {EventsApi, Event, CapacityAnalysisResponse} from "api";
-// @ts-ignore
+import {EventsApi, Event} from "api";
 import React, {useState} from "react";
 import {Card, Col, Row, Spinner} from "react-bootstrap";
 import {Calendar} from "react-calendar";

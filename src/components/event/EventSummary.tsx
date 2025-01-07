@@ -1,4 +1,3 @@
-import {LoadingState} from "hooks/useApiData.tsx";
 import {EventsApi, EventStatisticsResponse} from "api";
 import {Card, Spinner} from "react-bootstrap";
 import React from "react";

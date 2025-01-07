@@ -3,8 +3,7 @@ import {Card, Spinner} from "react-bootstrap";
 import Chart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 
-import {Balance, FinanceApi, RevenueSource, TopRevenueSourcesResponse} from "api";
-import {ErrorState, LoadingState, useApiData} from "hooks/useApiData.tsx";
+import {FinanceApi, RevenueSource, TopRevenueSourcesResponse} from "api";
 import {formatCurrency} from "utils/currency.ts";
 import {useCachedData} from "hooks/useCachedData.ts";
 import {TIMES} from "utils/times.ts";
