@@ -1,35 +1,36 @@
 import {ErrorState, LoadingState, useApiData} from "hooks/useApiData.tsx";
-import {EventsApi, Event} from "api";
+import {EventsApi, Event, CapacityAnalysisResponse} from "api";
 // @ts-ignore
 import React, {useState} from "react";
-import {Card, Col, Row} from "react-bootstrap";
+import {Card, Col, Row, Spinner} from "react-bootstrap";
 import {Calendar} from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import {useNavigate} from "react-router-dom";
 import {getStatusBadge} from "pages/dashboard/events/EventsPage.tsx";
+import {useCachedData} from "hooks/useCachedData.ts";
+import {TIMES} from "utils/times.ts";
 
 
 export const EventCalendar = () => {
     const navigate = useNavigate();
 
-    const { data, loading, error } = useApiData(
-        () => new EventsApi().getCalendarEventsCalendarGet({all: true}),
-        []
+    const eventsByDate = useCachedData<{ [key: string]: Event[]; }>(
+        async () => {
+            return  (await new EventsApi().getCalendarEventsCalendarGet({all: true})).reduce((acc, event) => {
+                const date = new Date(event.date).toISOString().split("T")[0];
+                acc[date] = acc[date] || [];
+                acc[date].push(event as Event);
+                return acc;
+            }, {} as { [key: string]: Event[] });
+        },
+        'events-calendar',
+        TIMES.ONE_MINUTE
     );
 
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
-
-    if (loading) return <LoadingState />;
-    if (error) return <ErrorState message={error} />;
-
-    const eventsByDate = data.reduce((acc, event) => {
-        const date = new Date(event.date).toISOString().split("T")[0];
-        acc[date] = acc[date] || [];
-        acc[date].push(event as Event);
-        return acc;
-    }, {} as { [key: string]: Event[] });
-
+    
     const handleDayClick = (value: Date) => {
+        if (!eventsByDate) return;
         const date = value.toISOString().split("T")[0];
         console.log(eventsByDate[date]);
         console.log(date);
@@ -51,28 +52,34 @@ export const EventCalendar = () => {
                 <Card className="h-100">
                     <Card.Body>
                         <h2 className="text-xl font-semibold mb-4">Calendário de Eventos</h2>
-                        <Calendar
-                            onClickDay={handleDayClick}
-                            tileClassName={({ date }) => {
-                                const dateString = date.toISOString().split("T")[0];
-                                return eventsByDate[dateString] ? "fw-bold text-white bg-warning" : "";
-                            }}
-                            tileContent={({ date }) => {
-                                const dateString = date.toISOString().split("T")[0];
-                                return eventsByDate[dateString] ? (
-                                    <div className="position-absolute bottom-0 start-50 translate-middle-x mb-1">
-                                        <div className="rounded-circle bg-danger" style={{ width: '4px', height: '4px' }}></div>
-                                    </div>
-                                ) : null;
-                            }}
-                        />
+                        { eventsByDate ? (
+                            <Calendar
+                                onClickDay={handleDayClick}
+                                tileClassName={({ date }) => {
+                                    const dateString = date.toISOString().split("T")[0];
+                                    return eventsByDate[dateString] ? "fw-bold text-white bg-warning" : "";
+                                }}
+                                tileContent={({ date }) => {
+                                    const dateString = date.toISOString().split("T")[0];
+                                    return eventsByDate[dateString] ? (
+                                        <div className="position-absolute bottom-0 start-50 translate-middle-x mb-1">
+                                            <div className="rounded-circle bg-danger" style={{ width: '4px', height: '4px' }}></div>
+                                        </div>
+                                    ) : null;
+                                }}
+                            />
+                        ) : (
+                            <div className="text-center py-5">
+                                <Spinner animation="border" variant="primary"/>
+                            </div>
+                        )}
                     </Card.Body>
                 </Card>
             </Col>
             <Col xl={8} lg={12} md={12} xs={12} className="mb-6 mb-xl-0">
                 <Card className="h-100">
                     <Card.Body>
-                        {selectedDate ? (
+                        {eventsByDate && selectedDate ? (
                             <div className="h-full">
                                 <h3 className="text-lg font-semibold mb-4">
                                     Eventos em {selectedDate.toString()}
@@ -108,6 +115,10 @@ export const EventCalendar = () => {
                                         ))}
                                     </div>
                                 </div>
+                            </div>
+                        ) : !eventsByDate ? (
+                            <div className="text-center py-5">
+                                <Spinner animation="border" variant="primary"/>
                             </div>
                         ) : (
                             <div>
