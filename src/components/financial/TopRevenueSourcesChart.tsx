@@ -1,28 +1,14 @@
-import React, {useEffect, useState} from "react";
 import {Card, Spinner} from "react-bootstrap";
 import Chart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 
-import {FinanceApi, RevenueSource, TopRevenueSourcesResponse} from "api";
+import {FinanceApi, TopRevenueSourcesResponse} from "api";
 import {formatCurrency} from "utils/currency.ts";
 import {useCachedData} from "hooks/useCachedData.ts";
 import {TIMES} from "utils/times.ts";
+import {useTopRevenueSources} from "hooks/useTopRevenueSources.ts";
 
-const useTopRevenueSources = (data:  TopRevenueSourcesResponse | null) => {
-  const [sources, setSources] = useState<RevenueSource[] | null>(null);
-  const [topRevenueChartSeries, setTopRevenueChartSeries] = useState<number[]>([]);
-  const [topRevenueChartLabels, setTopRevenueChartLabels] = useState<string[]>([]);
-  
-  useEffect(() => {
-    if (data) {
-      setSources(data.sources);
-      setTopRevenueChartSeries(data.sources.map((source) => source.totalAmount));
-      setTopRevenueChartLabels(data.sources.map((source) => source.category));
-    }
-  }, [data]);
-  
-  return { sources, topRevenueChartSeries, topRevenueChartLabels };
-}
+
 
 const TopRevenueSourcesChart = () => {
   const data  = useCachedData<TopRevenueSourcesResponse>(

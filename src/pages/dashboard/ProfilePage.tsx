@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import {useAuth} from 'hooks/useAuth';
+import {useAuth} from 'hooks/useAuth.ts';
 import { Container, Row, Col, Card, Form, Button, Alert, ListGroup } from 'react-bootstrap';
 import ShowIfAdmin from "components/auth/admin/show_if_admin.tsx";
-import {useProfilePicture} from "hooks/useProfilePicture.tsx";
-import useGetUsers from "hooks/useGetUsers.tsx";
+import {useProfilePicture} from "hooks/useProfilePicture.ts";
+import useGetUsers from "hooks/useGetUsers.ts";
 
 const ProfileManagement: React.FC = () => {
     const { user, changeUserRole, changePassword, deleteUser } = useAuth();

@@ -1,8 +1,8 @@
 import {Row, Col, Card, Form, Button, Image, Spinner} from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import React, { useState } from "react";
-import { useAuth } from 'hooks/useAuth';
-import { useMounted } from "hooks/useMounted";
+import { useAuth } from 'hooks/useAuth.ts';
+import { useMounted } from "hooks/useMounted.ts";
 
 const SignIn = () => {
   const hasMounted = useMounted();

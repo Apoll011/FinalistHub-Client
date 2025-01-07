@@ -9,7 +9,7 @@ import {
     ItemCreate, ObservationInput, DateInput, AccountResponse, FinanceApi
 } from 'api';
 import {getStatusBadge} from "pages/dashboard/events/EventsPage.tsx";
-import {useAuth} from "hooks/useAuth.tsx";
+import {useAuth} from "hooks/useAuth.ts";
 
 const EditEventPage = () => {
     const [showModal, setShowModal] = useState(false);

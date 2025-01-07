@@ -9,7 +9,7 @@ import {
     StandaloneItemSaleCreate,
     StandaloneItemsApi
 } from "api";
-import {useAuth} from "hooks/useAuth.tsx";
+import {useAuth} from "hooks/useAuth.ts";
 import ShowIfAdmin from "components/auth/admin/show_if_admin.tsx";
 
 const StandaloneApi = {

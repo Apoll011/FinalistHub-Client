@@ -1,10 +1,10 @@
 import {Row, Col, Card, Form, Button, Image, Spinner} from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import React, {useEffect, useState} from "react";
-import { useAuth } from 'hooks/useAuth';
-import { useMounted } from "hooks/useMounted";
+import { useAuth } from 'hooks/useAuth.ts';
+import { useMounted } from "hooks/useMounted.ts";
 import { Modal } from 'react-bootstrap';
-import {useProfilePicture} from "hooks/useProfilePicture.tsx";
+import {useProfilePicture} from "hooks/useProfilePicture.ts";
 
 const SignUp = () => {
   const hasMounted = useMounted();

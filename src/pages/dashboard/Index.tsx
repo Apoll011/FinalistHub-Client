@@ -8,11 +8,11 @@ import {EventCalendar} from "components/event/EventCalendar.tsx";
 import {ArrowDownCircle, ArrowUpCircle, Percent} from "react-feather";
 
 import {ProjectsStatsProps} from "types.ts";
-import {useAuth} from "hooks/useAuth";
+import {useAuth} from "hooks/useAuth.ts";
 import ShowIfAdmin from "components/auth/admin/show_if_admin.tsx";
 import TransactionForm from "components/financial/TransactionForm.tsx";
 import TransferForm from "components/financial/TransferForm.tsx";
-import {useResumeData} from "hooks/useResumeData.tsx";
+import {useResumeData} from "hooks/useResumeData.ts";
 import {CapacityAnalysis} from "components/event/CapacityAnalysis.tsx";
 
 const Dashboard = () => {

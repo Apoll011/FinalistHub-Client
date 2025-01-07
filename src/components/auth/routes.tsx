@@ -1,5 +1,5 @@
 import React from "react";
-import {useAuth} from "hooks/useAuth.tsx";
+import {useAuth} from "hooks/useAuth.ts";
 import {Navigate} from "react-router-dom";
 import {LoadingSpinner} from "components/LoadingSpinner.tsx";
 

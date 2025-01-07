@@ -1,6 +1,6 @@
 import {TransactionCategoryResponse} from "api";
 import React from "react";
-import {useCategoryCard} from "hooks/useCategoryCard.tsx";
+import {useCategoryCard} from "hooks/useCategoryCard.ts";
 import {Button, ButtonGroup, Card, Col, Row, Spinner} from "react-bootstrap";
 
 interface CategoryCardProps {

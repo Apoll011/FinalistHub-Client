@@ -17,7 +17,7 @@ import {
     LineElement,
     PointElement
 } from 'chart.js';
-import {useCategories} from "hooks/useCategories.tsx";
+import {useCategories} from "hooks/useCategories.ts";
 import {CategoryGrid} from "components/financial/CategoryCard.tsx";
 import {formatCurrency} from "utils/currency.ts";
 

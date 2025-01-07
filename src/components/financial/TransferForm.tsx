@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button, Row, Col } from 'react-bootstrap';
-import { useAuth } from 'hooks/useAuth';
+import { useAuth } from 'hooks/useAuth.ts';
 import {AccountResponse, FinanceApi, TransactionCreate} from "api";
 import Swal from "sweetalert2";
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { useAuth } from 'hooks/useAuth.tsx';
+import { useAuth } from 'hooks/useAuth.ts';
 
 interface AdminOnlyProps {
     content: string | number;

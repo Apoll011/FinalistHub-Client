@@ -4,7 +4,7 @@ import { Col, Row, Image, Container } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
 // import custom hook
-import { useMounted } from "hooks/useMounted";
+import { useMounted } from "hooks/useMounted.ts";
 
 const NotFound = () => {
   const hasMounted = useMounted();

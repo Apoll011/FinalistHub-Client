@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {Container, Row, Col, Button, Modal, Badge, Form, Spinner} from 'react-bootstrap';
 import {EventsApi, Event } from "api";
 import {ListEvents} from "components/event/ListEvents.tsx";
-import {useAuth} from "hooks/useAuth";
+import {useAuth} from "hooks/useAuth.ts";
 import ShowIfAdmin from "components/auth/admin/show_if_admin.tsx";
 
 

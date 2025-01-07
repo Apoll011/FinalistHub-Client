@@ -1,6 +1,6 @@
 import React, { useState, useEffect, ReactNode } from 'react';
 import {BASE_PATH} from "api";
-import { AuthContext, User } from 'hooks/useAuth.tsx';
+import { AuthContext, User } from 'hooks/useAuth.ts';
 
 interface AuthProviderProps {
     children: ReactNode;

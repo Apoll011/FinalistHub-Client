@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {useAuth, User} from "hooks/useAuth.tsx";
+import {useAuth, User} from "hooks/useAuth.ts";
 
 function useGetUsers(setError:  React.Dispatch<React.SetStateAction<string>>) {
     const { isAdmin, getUsers } = useAuth();

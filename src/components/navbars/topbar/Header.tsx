@@ -2,10 +2,10 @@
 import { Menu } from "react-feather";
 import {Link, useNavigate} from "react-router-dom";
 import { Navbar } from "react-bootstrap";
-import { useAuth } from 'hooks/useAuth';
+import { useAuth } from 'hooks/useAuth.ts';
 import React from "react";
 import {StarFill} from "react-bootstrap-icons";
-import {useProfilePicture} from "hooks/useProfilePicture.tsx";
+import {useProfilePicture} from "hooks/useProfilePicture.ts";
 
 interface HeaderProps {
     toggleMenu: () => void;
