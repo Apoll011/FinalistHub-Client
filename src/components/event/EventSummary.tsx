@@ -1,29 +1,22 @@
-import {ErrorState, LoadingState, useApiData} from "hooks/useApiData.tsx";
-import {EventsApi} from "api";
+import {LoadingState} from "hooks/useApiData.tsx";
+import {EventsApi, EventStatisticsResponse} from "api";
 import {Card} from "react-bootstrap";
 import React from "react";
 import AdminOnly from "components/auth/admin/admin_only.tsx";
+import {useCachedData} from "hooks/useCachedData.ts";
 import {formatCurrency} from "utils/currency.ts";
+import {TIMES} from "utils/times.ts";
 
 export const EventSummary = () => {
-    const { data, loading, error } = useApiData(
-        () => new EventsApi().getEventsStatisticsEventsStatisticsGet(),
-        {totalEvents: 0,
-            activeEvents: 0,
-            closedEvents: 0,
-            cancelledEvents: 0,
-            totalRevenue: 0,
-            dateRange: {
-                start: "2024-1-1",
-                end: "2024-12-31"
-            }
-        }
+    const eventsApi = new EventsApi();
+    
+    const data = useCachedData<EventStatisticsResponse>(
+        async () => await eventsApi.getEventsStatisticsEventsStatisticsGet(),
+        'events-summary-cache',
+        TIMES.minutes(5)
     );
 
-    if (loading) return <LoadingState />;
-    if (error) return <ErrorState message={error} />;
-
-    return (
+    return  data ? (
         <Card className="h-100">
             <Card.Body>
                 <div className="d-flex align-items-center justify-content-between">
@@ -62,5 +55,7 @@ export const EventSummary = () => {
                 </div>
             </Card.Body>
         </Card>
+    ) : (
+        <LoadingState />
     );
 };
