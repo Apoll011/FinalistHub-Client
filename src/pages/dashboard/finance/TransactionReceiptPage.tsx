@@ -235,6 +235,15 @@ const generatePDF = async (transaction: TransactionResponse): Promise<void> => {
         <title>Relatório da Transação: ${transaction.type}</title>
         <meta charset="utf-8">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">        <style>
+          body {
+            font-size: 18px;
+            font-family: Inter;
+            margin: 0rem;
+            padding: 0rem;
+          }
+          .shadow-sm {
+            box-shadow: 0 0 rgba(0,0,0,0) !important;
+          }
           @media print {
             body {
               -webkit-print-color-adjust: exact;
@@ -257,7 +266,7 @@ const generatePDF = async (transaction: TransactionResponse): Promise<void> => {
             setTimeout(() => {
               window.print();
               window.close();
-            }, 1000);
+            }, 2000);
           };
         </script>
       </body>
