@@ -49,7 +49,7 @@ const TransactionForm = ({
             await new FinanceApi().createTransactionFinanceTransactionsPost({transactionCreate: formData});
             onHide();
             await Swal.fire({
-                title: 'Ganho registrado com sucesso!',
+                title: 'Receita adicionada com sucesso!',
                 icon: 'success',
                 confirmButtonText: 'OK'
             });

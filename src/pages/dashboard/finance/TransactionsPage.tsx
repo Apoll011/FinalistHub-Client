@@ -99,8 +99,8 @@ const TransactionsPage = () => {
             }
             return acc;
         }, {});
-
-        const chartData: TransactionChartData = {
+        
+        return {
             labels: Object.keys(dailyTotals).map(f => new Date(f).toISOString().split('T')[0]),
             datasets: [
                 {
@@ -117,8 +117,6 @@ const TransactionsPage = () => {
                 }
             ]
         };
-
-        return chartData;
     };
 
     const chartOptions: ChartOptions<'line'> = {

@@ -184,7 +184,7 @@ This project is licensed under the MIT License. For more details, please refer t
 
 ---
 
-## Acknowledgments 🙏
+## Acknowledgments
 
 - **React** and **TypeScript** for providing the tools to build modern web applications.
 - **OpenAPI** for enabling seamless communication between the frontend and backend.

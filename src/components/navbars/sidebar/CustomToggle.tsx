@@ -1,5 +1,5 @@
 //import node module libraries
-import { useContext } from "react";
+import React, { useContext } from "react";
 import { useAccordionButton, AccordionContext } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
@@ -27,7 +27,7 @@ export const CustomToggle: React.FC<CustomToggleProps> = ({
         onClick={decoratedOnClick}
         data-bs-toggle="collapse"
         data-bs-target="#navDashboard"
-        aria-expanded={isCurrentEventKey ? true : false}
+        aria-expanded={isCurrentEventKey}
         aria-controls="navDashboard"
       >
         {icon ? <i className={`nav-icon fe fe-${icon} me-2`}></i> : ""}{" "}

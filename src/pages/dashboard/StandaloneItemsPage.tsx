@@ -137,7 +137,7 @@ const CloseItemModal:React.FC<{
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         handleClose();
-        StandaloneApi.closeItem(item.id, user!.id, accountId!).then(r => onClose());
+        StandaloneApi.closeItem(item.id, user!.id, accountId!).then(() => onClose());
     };
 
     return (
@@ -392,7 +392,7 @@ const StandaloneSalesPage = () => {
     }, [fetchItems]);
 
     const handleSaleSuccess = () => {
-        addNotification('Venda registrada com sucesso!', 'success');
+        addNotification('Venda adicionada com sucesso!', 'success');
         fetchItems();
     };
 

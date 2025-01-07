@@ -1,8 +1,7 @@
 // Import node module libraries
 import React, { Suspense } from "react";
 import { Outlet } from "react-router";
-import {createBrowserRouter, Navigate, RouterProvider} from "react-router-dom";
-import {HashLoader} from "react-spinners";
+import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import EditEventPage from "pages/dashboard/events/EventPage.tsx";
 import EventsPage from "pages/dashboard/events/EventsPage.tsx";
 import MeetingManagement from "pages/dashboard/MeetingsPage.tsx";
@@ -10,7 +9,6 @@ import SalesDashboard from "pages/dashboard/events/EventSalePage.tsx";
 import TicketSalesPage from "pages/dashboard/events/EventTicketsPage.tsx";
 import SearchEventsPage from "pages/dashboard/events/SearchEventsPage.tsx";
 import {AuthProvider} from "components/auth/AuthProvider.tsx";
-import { useAuth } from 'hooks/useAuth.ts';
 import ProfileManagement from "pages/dashboard/ProfilePage.tsx";
 import CategoriesPage from "pages/dashboard/finance/CategoriesPage.tsx";
 import TransferHistory from "pages/dashboard/finance/TransferHistoryPage.tsx";

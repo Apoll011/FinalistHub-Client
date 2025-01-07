@@ -73,7 +73,7 @@ export const MeetingManagement = () => {
     };
 
     const handleDelete = async (meetingId: string) => {
-        if (window.confirm('Tems certeza que queres apaga está reunião?')) {
+        if (window.confirm('Tens certeza que queres apaga está reunião?')) {
             try {
                 await MeetingApi.deleteMeeting(meetingId);
                 setAlert({ show: true, message: 'Reunião apagada com sucesso!', variant: 'success' });

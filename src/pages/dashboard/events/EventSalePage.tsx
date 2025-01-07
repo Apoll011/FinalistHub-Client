@@ -133,7 +133,7 @@ export const SalesDashboard = () => {
         salesQueue.addSale(
             saleForm,
             () => {
-                addNotification('Venda registrada com sucesso!', 'success');
+                addNotification('Venda adicionada com sucesso!', 'success');
                 setSaleForm({ itemId: "", quantitySold: 1 });
                 setSelectedItem(null);
                 fetchData();
@@ -149,10 +149,10 @@ export const SalesDashboard = () => {
         e.preventDefault();
         try {
             await SaleApi.registerItem(registerForm.eventId, registerForm);
-            addNotification('Item registrado com sucesso!', 'success');
+            addNotification('Item adicionado com sucesso!', 'success');
             setShowRegisterModal(false);
             setRegisterForm({ name: '', price: 0, quantity: 0, eventId: id as string });
-            fetchData();
+            await fetchData();
         } catch (error) {
             addNotification(`Erro: ${error}`, 'danger');
         }
@@ -171,7 +171,7 @@ export const SalesDashboard = () => {
             setShowRecountModal(false);
             setSelectedItemForRecount(null);
             setRecountQuantity(0);
-            fetchData();
+            await fetchData();
         } catch (error) {
             addNotification(`Erro: ${error}`, 'danger');
         }
@@ -206,7 +206,7 @@ export const SalesDashboard = () => {
                 salesQueue.addSale(
                     bulkSale,
                     () => {
-                        addNotification('Venda registrada com sucesso!', 'success');
+                        addNotification('Venda adicionada com sucesso!', 'success');
                         fetchData();
                     },
                     (error) => {

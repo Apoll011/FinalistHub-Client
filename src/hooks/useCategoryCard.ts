@@ -1,7 +1,6 @@
-import {TransactionCategoryResponse} from "api";
 import {useState} from "react";
 
-export const useCategoryCard = (category: TransactionCategoryResponse) => {
+export const useCategoryCard = () => {
     const [isHovered, setIsHovered] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
     const [localLoading, setLocalLoading] = useState(false);

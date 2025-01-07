@@ -57,7 +57,7 @@ const PDFReport: React.FC<PDFReportProps> = ({ eventData }) => {
                         </div>
                     </div>
                     <div className="text-right">
-                        <p className="text-sm text-gray-600">Relatorio de Evento</p>
+                        <p className="text-sm text-gray-600">Relatório de Evento</p>
                         <p className="text-sm text-gray-600">Gerado em: {new Date().toLocaleDateString()}</p>
                     </div>
                 </div>

@@ -127,7 +127,7 @@ export class AuthApi extends runtime.BaseAPI {
         }
 
         const response = await this.request({
-            path: `/auth/user/{username}`.replace(`{${"username"}}`, encodeURIComponent(String(requestParameters['username']))),
+            path: `/auth/user/{username}`.replace(`{username}`, encodeURIComponent(String(requestParameters['username']))),
             method: 'DELETE',
             headers: headerParameters,
             query: queryParameters,

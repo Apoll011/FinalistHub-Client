@@ -36,13 +36,13 @@ const TransferForm = ({
             await new FinanceApi().createTransactionFinanceTransactionsPost({transactionCreate: formData});
             onHide();
             await Swal.fire({
-                title: 'Tranferencia feita com sucesso!',
+                title: 'Transferência feita com sucesso!',
                 icon: 'success',
                 confirmButtonText: 'OK'
             });
         } catch {
             await Swal.fire({
-                title: 'Erro tranferindo o dinheiro!',
+                title: 'Erro transferindo o dinheiro!',
                 text: 'Please try again',
                 icon: 'error',
                 confirmButtonText: 'OK'

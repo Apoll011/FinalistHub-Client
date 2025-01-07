@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Spinner } from 'react-bootstrap';
 import { Line } from 'react-chartjs-2';
 import {
@@ -13,7 +13,6 @@ import {
     ChartData,
     ChartOptions
 } from 'chart.js';
-import {CashflowForecast, FinanceApi} from "api";
 import {formatCurrency} from "utils/currency.ts";
 import {useForecast} from "hooks/useForecast.ts";
 

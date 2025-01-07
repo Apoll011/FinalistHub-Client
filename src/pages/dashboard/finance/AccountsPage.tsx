@@ -103,7 +103,7 @@ const AccountsPage = () => {
             await apiFunctions.createAccount(newAccount as AccountCreate);
             setShowCreateModal(false);
             setNewAccount({ name: '', type: 'bank', description: '' });
-            fetchAccounts();
+            await fetchAccounts();
         } catch {
             setError('Failed to create account');
         } finally {

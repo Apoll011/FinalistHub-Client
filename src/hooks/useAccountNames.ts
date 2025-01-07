@@ -76,7 +76,7 @@ export const useAccountNames = (accountIds: (string | null | undefined)[]) => {
         } else {
             setState((prev) => ({ ...prev, isLoading: false }));
         }
-    }, [accountIds]);
+    }, []);
     
     const getAccountName = (id: string | null | undefined) => {
         if (!id) return 'Conta Desconhecida';

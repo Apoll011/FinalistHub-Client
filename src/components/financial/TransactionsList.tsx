@@ -1,8 +1,8 @@
-import React, {useState, useEffect} from 'react';
+import React from 'react';
 import {Card, ListGroup, Badge, Row, Col} from 'react-bootstrap';
 import {useNavigate} from 'react-router-dom';
 import {ArrowUp, ArrowDown, ArrowLeftRight} from 'react-bootstrap-icons';
-import {FinanceApi, TransactionResponse} from 'api';
+import {TransactionResponse} from 'api';
 import {formatCurrency} from "utils/currency.ts";
 import {useAccountNames} from "hooks/useAccountNames.ts";
 

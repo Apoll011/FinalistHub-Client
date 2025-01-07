@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {Card, Button, Row, Col, Alert, Spinner} from 'react-bootstrap';
-import {AuthApi, CategoriesApi, EventsApi, FinanceApi, TransactionResponse} from 'api';
+import {FinanceApi, TransactionResponse} from 'api';
 import { Bank, CreditCard, Wallet } from 'react-bootstrap-icons';
 import {useParams} from "react-router-dom";
 import ReactDOMServer from "react-dom/server";
@@ -132,7 +132,7 @@ const generatePDF = async (transaction: TransactionResponse): Promise<void> => {
 
     printWindow.document.write(`
     <!DOCTYPE html>
-    <html>
+    <html lang="pt">
       <head>
         <title>Relatório da Transação: ${transaction.type}</title>
         <meta charset="utf-8">
@@ -140,8 +140,8 @@ const generatePDF = async (transaction: TransactionResponse): Promise<void> => {
           body {
             font-size: 18px;
             font-family: Inter;
-            margin: 0rem;
-            padding: 0rem;
+            margin: 0;
+            padding: 0;
           }
           .shadow-sm {
             box-shadow: 0 0 rgba(0,0,0,0) !important;

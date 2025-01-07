@@ -76,7 +76,7 @@ const EditEventPage = () => {
 
             setLoading(false);
         } catch (error) {
-            setError('Um erro inesperado occoreu: ' + error);
+            setError('Um erro inesperado aconteceu: ' + error);
             setLoading(false);
         }
 
@@ -247,7 +247,7 @@ const EditEventPage = () => {
                             <tr>
                                 <th>Tipo</th>
                                 <th>Preço</th>
-                                <th>Disponivel</th>
+                                <th>Disponível</th>
                                 <th>Ações</th>
                             </tr>
                             </thead>
@@ -283,7 +283,7 @@ const EditEventPage = () => {
                                             }}
                                             disabled={event.status !== 'active' || loading}
                                         >
-                                            Deletar
+                                            Apagar
                                         </Button></td>
                                 </tr>
                             ))}
@@ -328,7 +328,7 @@ const EditEventPage = () => {
                                             }}
                                             disabled={event.status !== 'active' || loading}
                                         >
-                                            Deletar
+                                            Apagar
                                         </Button></td>
                                 </tr>
                             ))}
@@ -486,7 +486,7 @@ const EditEventPage = () => {
 
                     {(modalType === 'cancel' || modalType === 'close' || modalType === 'reopen') && (
                         <div>
-                            <p>Tems certeza que queres {modalType} este evento?</p>
+                            <p>Tens certeza que queres {modalType} este evento?</p>
                             {modalType === 'close' && (
                             <Form>
                                 <Form.Group className="mb-3">

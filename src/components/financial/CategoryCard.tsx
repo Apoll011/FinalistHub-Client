@@ -26,7 +26,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
         handleMouseEnter,
         handleMouseLeave,
         toggleExpand,
-    } = useCategoryCard(category);
+    } = useCategoryCard();
     
     return (
         <Card
