@@ -1,8 +1,7 @@
 import React, {Fragment, useState } from 'react';
-import {Button, Col, Container, Row, Card, Table } from 'react-bootstrap';
+import {Button, Col, Container, Row } from 'react-bootstrap';
 import { StatRightTopIcon } from 'components';
 import { TopRevenueSourcesChart } from "components";
-import {CapacityAnalysisEvent } from "api";
 import {CurrencyDollar} from "react-bootstrap-icons";
 import {EventSummary} from "components/event/EventSummary.tsx";
 import {EventCalendar} from "components/event/EventCalendar.tsx";
@@ -14,45 +13,7 @@ import ShowIfAdmin from "components/auth/admin/show_if_admin.tsx";
 import TransactionForm from "components/financial/TransactionForm.tsx";
 import TransferForm from "components/financial/TransferForm.tsx";
 import {useResumeData} from "hooks/useResumeData.tsx";
-
-const CapacityAnalysis: React.FC<{ capacityAnalysis: CapacityAnalysisEvent[] }> = ({ capacityAnalysis }) => {
-    return (
-        <Card className="h-100">
-            <Card.Body>
-                <div className="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h4 className="mb-0">Eventos para Acontecer</h4>
-                    </div>
-                </div>
-                <Table className="mt-4" responsive>
-                    <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>Data</th>
-                        <th>Bilhetes Vendidos</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {capacityAnalysis && capacityAnalysis.length > 0 ? (
-                        capacityAnalysis.map((event: CapacityAnalysisEvent) => (
-                            <tr key={event.eventId}>
-                                <td>{event.name}</td>
-                                <td>{new Date(event.date).toLocaleDateString()}</td>
-                                <td>{event.ticketsSold}</td>
-                            </tr>
-                        ))) : (
-                        <tr>
-                            <td colSpan={3} className="text-center">
-                                Nenhum Eventos para Acontecer
-                            </td>
-                        </tr>
-                    )}
-                    </tbody>
-                </Table>
-            </Card.Body>
-        </Card>
-    );
-};
+import {CapacityAnalysis} from "components/event/CapacityAnalysis.tsx";
 
 const Dashboard = () => {
     const { isAdmin } = useAuth();
@@ -135,7 +96,7 @@ const Dashboard = () => {
                 </Row>
 
                 <Row className="my-3">
-                    <CapacityAnalysis capacityAnalysis={eventToHappen.capacityAnalysis}/>
+                    <CapacityAnalysis capacityAnalysis={eventToHappen?.capacityAnalysis}/>
                 </Row>
 
                 <Row className="my-6">

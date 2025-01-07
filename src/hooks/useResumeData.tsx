@@ -1,5 +1,6 @@
 import {Balance, CapacityAnalysisResponse, EventsApi, FinanceApi, ProfitReportResponse} from "api";
 import { useCachedData } from "./useCachedData";
+import {TIMES} from "utils/times.ts";
 
 export const useResumeData = () => {
     const financeApi = new FinanceApi();
@@ -15,8 +16,9 @@ export const useResumeData = () => {
     
     const eventToHappen = useCachedData<CapacityAnalysisResponse>(
         () => eventsApi.getCapacityAnalysisEventsCapacityAnalysisGet(),
-        'events-cache'
-    ) ?? { capacityAnalysis: [] };
+        'events-cache',
+        TIMES.ONE_MINUTE
+    );
     
     const profitData = useCachedData<ProfitReportResponse>(
         () => financeApi.getProfitReportFinanceProfitGet(),
