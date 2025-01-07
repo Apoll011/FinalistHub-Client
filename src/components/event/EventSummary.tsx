@@ -3,6 +3,7 @@ import {EventsApi} from "api";
 import {Card} from "react-bootstrap";
 import React from "react";
 import AdminOnly from "components/auth/admin/admin_only.tsx";
+import {formatCurrency} from "utils/currency.ts";
 
 export const EventSummary = () => {
     const { data, loading, error } = useApiData(
@@ -18,14 +19,6 @@ export const EventSummary = () => {
             }
         }
     );
-
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('pt-PT', {
-            style: 'currency',
-            currency: 'CVE'
-        }).format(amount);
-    };
-
 
     if (loading) return <LoadingState />;
     if (error) return <ErrorState message={error} />;

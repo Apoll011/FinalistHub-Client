@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 import { Image } from "react-bootstrap";
 import {getStatusBadge} from "pages/dashboard/events/EventsPage.tsx";
+import {formatCurrency} from "utils/currency.ts";
 
 interface TicketSale {
     type: string;
@@ -43,13 +44,6 @@ interface PDFReportProps {
 }
 
 const PDFReport: React.FC<PDFReportProps> = ({ eventData }) => {
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('pt-PT', {
-            style: 'currency',
-            currency: 'CVE'
-        }).format(amount);
-    };
-
     return (
         <div id="pdf-report" className="max-w-full mx-auto bg-white p-8">
             {/* Header */}

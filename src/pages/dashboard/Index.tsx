@@ -1,14 +1,13 @@
-import React, {Fragment, useState, useEffect} from 'react';
-import {Button, Col, Container, Form, Modal, Row, Card, Table } from 'react-bootstrap';
+import React, {Fragment, useState } from 'react';
+import {Button, Col, Container, Row, Card, Table } from 'react-bootstrap';
 import { StatRightTopIcon } from 'components';
 import { TopRevenueSourcesChart } from "components";
-import {CapacityAnalysisEvent, CapacityAnalysisResponse, EventsApi, FinanceApi, TransactionCreate} from "api";
-import {ErrorState} from "hooks/useApiData.tsx";
+import {CapacityAnalysisEvent } from "api";
 import {CurrencyDollar} from "react-bootstrap-icons";
 import {EventSummary} from "components/event/EventSummary.tsx";
 import {EventCalendar} from "components/event/EventCalendar.tsx";
 import {ArrowDownCircle, ArrowUpCircle, Percent} from "react-feather";
-import Swal from 'sweetalert2';
+
 import {ProjectsStatsProps} from "types.ts";
 import {useAuth} from "hooks/useAuth";
 import ShowIfAdmin from "components/auth/admin/show_if_admin.tsx";

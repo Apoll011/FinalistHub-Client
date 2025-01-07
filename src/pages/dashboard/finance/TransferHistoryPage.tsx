@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Form, Button, Card, Spinner } from 'react-bootstrap';
 import TransactionsList from "components/financial/TransactionsList";
 import { FinanceApi, GetTransferHistoryFinanceAccountsTransferHistoryGetRequest, TransactionResponse } from "api";
+import {formatCurrency} from "utils/currency.ts";
 
 interface TransferSummary {
     total_transfers: number;
@@ -50,14 +51,7 @@ const TransferHistoryPage = () => {
     
     useEffect(() => {
         fetchTransferHistory();
-    }, []); // Only fetch on mount, not on filter changes
-    
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('pt-PT', {
-            style: 'currency',
-            currency: 'CVE'
-        }).format(amount);
-    };
+    }, []);
     
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();

@@ -6,6 +6,7 @@ import {PlusCircle} from "react-feather";
 import TransactionsList from "components/financial/TransactionsList.tsx";
 import TransactionForm from "components/financial/TransactionForm.tsx";
 import TransferForm from "components/financial/TransferForm.tsx";
+import {formatCurrency} from "utils/currency.ts";
 
 const apiFunctions = {
     getAccounts: async () => await new FinanceApi().getAccountsFinanceAccountsGet(),
@@ -77,13 +78,6 @@ const AccountsPage = () => {
     useEffect(() => {
         fetchAccounts();
     }, []);
-
-    const formatCurrency = (value: number) => {
-        return new Intl.NumberFormat('pt-PT', {
-            style: 'currency',
-            currency: 'CVE'
-        }).format(value);
-    };
 
     const getAccountIcon = (type: string) => {
         switch (type.toLowerCase()) {

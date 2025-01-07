@@ -6,6 +6,7 @@ import {Button, Card, Col, Modal, Row, Table} from "react-bootstrap";
 import {getStatusBadge} from "pages/dashboard/events/EventsPage.tsx";
 import ShowIfAdmin from "components/auth/admin/show_if_admin.tsx";
 import AdminOnly from "components/auth/admin/admin_only.tsx";
+import {formatCurrency} from "utils/currency.ts";
 
 export const ListEvents: React.FC<{events: Event[]}> = ({events}) => {
     const [selectedEvent, setSelectedEvent] = useState<EventDetailsResponse | null>(null);
@@ -34,14 +35,7 @@ export const ListEvents: React.FC<{events: Event[]}> = ({events}) => {
     const handleEditClick = (eventId: string) => {
         navigate(`/event/${eventId}`);
     };
-
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('pt-PT', {
-            style: 'currency',
-            currency: 'CVE'
-        }).format(amount);
-    };
-
+    
     const getReport = async (reportID: string) => {
         const report = await new EventsApi().reportEventsEventIdReportGet({eventId: reportID});
         generatePDF(report).then(() => console.log("Printing..."));

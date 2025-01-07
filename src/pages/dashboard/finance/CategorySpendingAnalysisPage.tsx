@@ -10,6 +10,7 @@ import {
     ChartOptions
 } from 'chart.js';
 import {FinanceApi, CategorySpendingAnalysis} from "api";
+import {formatCurrency} from "utils/currency.ts";
 
 ChartJS.register(
     ArcElement,
@@ -44,13 +45,6 @@ const CategorySpendingAnalysisComponent = () => {
     useEffect(() => {
         fetchData();
     }, []);
-
-    const formatCurrency = (value: number) => {
-        return new Intl.NumberFormat('pt-PT', {
-            style: 'currency',
-            currency: 'CVE'
-        }).format(value);
-    };
 
     const formatPercentage = (value: number) => {
         return `${value.toFixed(1)}%`;

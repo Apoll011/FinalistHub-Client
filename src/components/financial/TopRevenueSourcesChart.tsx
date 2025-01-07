@@ -6,6 +6,7 @@ import { ApexOptions } from "apexcharts";
 
 import {FinanceApi} from "api";
 import {ErrorState, LoadingState, useApiData} from "hooks/useApiData.tsx";
+import {formatCurrency} from "utils/currency.ts";
 
 
 const TopRevenueSourcesChart = () => {
@@ -13,14 +14,6 @@ const TopRevenueSourcesChart = () => {
       () => new FinanceApi().getTopRevenueSourcesFinanceTopRevenueSourcesGet({limit: 3}),
       { sources: [] }
   );
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('pt-PT', {
-      style: 'currency',
-      currency: 'CVE'
-    }).format(amount);
-  };
-
 
   if (loading) return <LoadingState />;
   if (error) return <ErrorState message={error} />;

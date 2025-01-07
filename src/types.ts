@@ -26,9 +26,9 @@ export interface DashboardMenuProps {
 export interface ProjectsStatsProps {
   id: number;
   title: string;
-  value: number | string;
+  value: number | string | null | undefined;
   icon: React.ReactNode;
-  statInfo: string;
+  statInfo: string | null;
   statusColor: string;
 }
 

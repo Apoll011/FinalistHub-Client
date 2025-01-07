@@ -19,6 +19,7 @@ import {
 } from 'chart.js';
 import {useCategories} from "hooks/useCategories.tsx";
 import {CategoryGrid} from "components/financial/CategoryCard.tsx";
+import {formatCurrency} from "utils/currency.ts";
 
 ChartJS.register(
     CategoryScale,
@@ -89,13 +90,6 @@ const CategoryForm: React.FC<{
 const StatsDisplay: React.FC<{
     usage: CategoryUsageResponse;
 }> = ({ usage }) => {
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('pt-PT', {
-            style: 'currency',
-            currency: 'CVE'
-        }).format(amount);
-    };
-    
     const chartData = useMemo(() => {
         const dailyData: Record<string, number> = {};
         usage.transactions.forEach((transaction) => {

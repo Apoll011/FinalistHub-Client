@@ -16,6 +16,7 @@ import {
 } from 'chart.js';
 import {FinanceApi, MonthlyFinancialReport, TransactionResponse, WeeklyFinancialReport} from "api";
 import TransactionsList from "components/financial/TransactionsList.tsx";
+import {formatCurrency} from "utils/currency.ts";
 
 ChartJS.register(
     CategoryScale,
@@ -80,13 +81,6 @@ const TransactionsPage = () => {
     useEffect(() => {
         fetchData();
     }, []);
-
-    const formatCurrency = (value: number) => {
-        return new Intl.NumberFormat('pt-PT', {
-            style: 'currency',
-            currency: 'CVE'
-        }).format(value);
-    };
 
     type TransactionChartData = ChartData<'line', number[], string>;
 

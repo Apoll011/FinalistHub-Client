@@ -14,6 +14,7 @@ import {
     ChartOptions
 } from 'chart.js';
 import {CashflowForecast, FinanceApi} from "api";
+import {formatCurrency} from "utils/currency.ts";
 
 ChartJS.register(
     CategoryScale,
@@ -51,13 +52,6 @@ const CashflowForecastPage = () => {
     useEffect(() => {
         fetchForecast();
     }, []);
-
-    const formatCurrency = (value: number) => {
-        return new Intl.NumberFormat('pt-PT', {
-            style: 'currency',
-            currency: 'CVE'
-        }).format(value);
-    };
 
     const chartData: ChartData<"line", number[], string> | null = forecastData ? {
         labels: forecastData.dailyForecasts.map(f => new Date(f.date).toISOString().split('T')[0]),
