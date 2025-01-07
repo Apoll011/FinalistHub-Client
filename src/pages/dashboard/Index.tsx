@@ -13,6 +13,7 @@ import {useAuth} from "hooks/useAuth";
 import ShowIfAdmin from "components/auth/admin/show_if_admin.tsx";
 import TransactionForm from "components/financial/TransactionForm.tsx";
 import TransferForm from "components/financial/TransferForm.tsx";
+import {useResumeData} from "hooks/useResumeData.tsx";
 
 const CapacityAnalysis: React.FC<{ capacityAnalysis: CapacityAnalysisEvent[] }> = ({ capacityAnalysis }) => {
     return (
@@ -60,82 +61,39 @@ const Dashboard = () => {
     const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
     const [showTransferModal, setShowTransferModal] = useState(false);
 
-    const [balanceData, setBalanceData] = useState({ currentBalance: 0, lastUpdated: new Date() });
-    const [eventToHappen, setEventToHappen] = useState<CapacityAnalysisResponse>({capacityAnalysis: []});
-    const [profitData, setProfitData] = useState({
-        totalRevenue: 0,
-        totalExpenses: 0,
-        profitMargin: 0,
-        period: { year: new Date().getFullYear(), month: new Date().getMonth() }
-    });
-
-    const formatCurrency = (amount:number) => {
-        return new Intl.NumberFormat('pt-PT', {
-            style: 'currency',
-            currency: 'CVE'
-        }).format(amount);
-    };
-
-    const refreshData = async () => {
-        const balanceResponse = await new FinanceApi().getTotalBalanceFinanceBalanceGet();
-        const profitResponse = await new FinanceApi().getProfitReportFinanceProfitGet();
-        const eventResponse = await new EventsApi().getCapacityAnalysisEventsCapacityAnalysisGet();
-
-        setBalanceData({
-            currentBalance: balanceResponse.currentBalance,
-            lastUpdated: new Date(),
-        });
-
-        setProfitData({
-            totalRevenue: profitResponse.totalRevenue,
-            totalExpenses: profitResponse.totalExpenses,
-            profitMargin: profitResponse.profitMargin,
-            period: profitResponse.period,
-        });
-
-        setEventToHappen(eventResponse);
-    };
-
-    useEffect(() => {
-        refreshData().then(() => console.log("Dados refrescados"));
-        const intervalId = setInterval(() => {
-            refreshData().then(() => console.log("Dados refrescados"));
-        }, 10000);
-
-        return () => clearInterval(intervalId);
-    }, []);
-
+    const {balanceData, eventToHappen, profitData} = useResumeData();
+    
     const projectStats: ProjectsStatsProps[] = [
         {
             id: 1,
             title: 'Saldo Atual',
-            value: balanceData ? formatCurrency(balanceData.currentBalance) : '...',
+            value: balanceData?.currentBalance,
             icon: <CurrencyDollar size={18} />,
-            statInfo: balanceData?.lastUpdated?.toLocaleString(),
+            statInfo: balanceData?.lastUpdated?.toLocaleString() || "",
             statusColor: 'primary'
         },
         {
             id: 2,
             title: 'Ganho Total',
-            value: formatCurrency(profitData.totalRevenue),
+            value: profitData?.totalRevenue,
             icon: <ArrowUpCircle size={18} />,
-            statInfo: `${profitData.period.year}/${profitData.period.month}`,
+            statInfo: `${profitData?.period.year}/${profitData?.period.month}`,
             statusColor: 'primary'
         },
         {
             id: 3,
             title: 'Total de Gastos',
-            value: formatCurrency(profitData.totalExpenses),
+            value: profitData?.totalExpenses,
             icon: <ArrowDownCircle size={18} />,
-            statInfo: `${profitData.period.year}/${profitData.period.month}`,
+            statInfo: `${profitData?.period.year}/${profitData?.period.month}`,
             statusColor: 'danger'
         },
         {
             id: 4,
             title: 'Margem de Lucro',
-            value: profitData.profitMargin + "%",
+            value: profitData ? profitData?.profitMargin + "%" : null,
             icon: <Percent size={18} />,
-            statInfo: `${profitData.period.year}/${profitData.period.month}`,
+            statInfo: `${profitData?.period.year}/${profitData?.period.month}`,
             statusColor: 'warning'
         },
     ];
@@ -165,14 +123,9 @@ const Dashboard = () => {
                         </ShowIfAdmin>
                     </Row>
 
-                    {/* Stats Section */}
                     {projectStats.map((stat) => (
                         <Col xl={3} lg={6} md={12} xs={12} className="mt-6" key={stat.id}>
-                            {balanceData ? (
-                                <StatRightTopIcon info={stat} />
-                            ) : (
-                                <ErrorState message="Failed to load balance information" />
-                            )}
+                            <StatRightTopIcon info={stat} />
                         </Col>
                     ))}
                 </Row>
