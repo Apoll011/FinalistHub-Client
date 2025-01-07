@@ -17,11 +17,11 @@ import {CapacityAnalysis} from "components/event/CapacityAnalysis.tsx";
 
 const Dashboard = () => {
     const { isAdmin } = useAuth();
-
+    
     const [showAddRevenueModal, setShowAddRevenueModal] = useState(false);
     const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
     const [showTransferModal, setShowTransferModal] = useState(false);
-
+    
     const {balanceData, eventToHappen, profitData} = useResumeData();
     
     const projectStats: ProjectsStatsProps[] = [
@@ -58,7 +58,7 @@ const Dashboard = () => {
             statusColor: 'warning'
         },
     ];
-
+    
     return (
         <Fragment>
             <div className="bg-primary pt-10 pb-21"></div>
@@ -68,7 +68,7 @@ const Dashboard = () => {
                         <Col>
                             <h2 className="text-white">Dashboard</h2>
                         </Col>
-
+                        
                         <ShowIfAdmin>
                             <Col xs="auto">
                                 <Button variant="primary" className="bg-success mx-3" onClick={() => setShowAddRevenueModal(isAdmin)}>
@@ -83,34 +83,29 @@ const Dashboard = () => {
                             </Col>
                         </ShowIfAdmin>
                     </Row>
-
+                    
                     {projectStats.map((stat) => (
                         <Col xl={3} lg={6} md={12} xs={12} className="mt-6" key={stat.id}>
                             <StatRightTopIcon info={stat} />
                         </Col>
                     ))}
                 </Row>
-
+                
                 <Row className="my-6">
                     <EventSummary />
                 </Row>
-
+                
                 <Row className="my-3">
                     <CapacityAnalysis capacityAnalysis={eventToHappen?.capacityAnalysis}/>
                 </Row>
-
+                
                 <Row className="my-6">
                     <EventCalendar />
                 </Row>
-
+                
                 <ShowIfAdmin>
                     <Row className="my-6">
-                        <Col xl={4} lg={12} md={12} xs={12} className="mb-6 mb-xl-0">
-                            <TopRevenueSourcesChart />
-                        </Col>
-                        <Col xl={8} lg={12} md={12} xs={12}>
-
-                        </Col>
+                        <TopRevenueSourcesChart />
                     </Row>
                     <TransactionForm
                         show={showAddRevenueModal}
