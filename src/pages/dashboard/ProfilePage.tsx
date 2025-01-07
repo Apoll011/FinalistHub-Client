@@ -1,35 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import {useAuth, User} from 'hooks/useAuth';
+import React, { useState } from 'react';
+import {useAuth} from 'hooks/useAuth';
 import { Container, Row, Col, Card, Form, Button, Alert, ListGroup } from 'react-bootstrap';
 import ShowIfAdmin from "components/auth/admin/show_if_admin.tsx";
 import {useProfilePicture} from "hooks/useProfilePicture.tsx";
+import useGetUsers from "hooks/useGetUsers.tsx";
 
 const ProfileManagement: React.FC = () => {
-    const { user, isAdmin, getUsers, changeUserRole, changePassword, deleteUser } = useAuth();
-    const [users, setUsers] = useState<User[]>([]);
+    const { user, changeUserRole, changePassword, deleteUser } = useAuth();
     const [newPassword, setNewPassword] = useState('');
     const [selectedRole, setSelectedRole] = useState('');
     const [selectedUser, setSelectedUser] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     
+    const { users, loadUsers } = useGetUsers(setError);
+    
     const profileImage = useProfilePicture(user?.username || "");
-
-    useEffect(() => {
-        if (isAdmin) {
-            loadUsers().then(() => {});
-        }
-    }, [isAdmin]);
-
-    const loadUsers = async () => {
-        try {
-            const userList: User[] = await getUsers();
-            setUsers(userList);
-        } catch {
-            setError('Falha ao carregar os usuários');
-        }
-    };
-
+    
     const handleChangePassword = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
@@ -132,6 +119,23 @@ const ProfileManagement: React.FC = () => {
                                     </Col>
                                 </Row>
                             </Form>
+                            
+                            {user && (
+                                <Row className="align-items-end">
+                                    <Col xs={12} sm={8}>
+                                        <h3 className="h5 mb-3">Apagar Conta</h3>
+                                    </Col>
+                                    <Col xs={12} sm={4} className="mt-2 mt-sm-0">
+                                        <Button
+                                            variant="danger"
+                                            className="w-100"
+                                            onClick={() => handleDeleteUser(user.username)}
+                                        >
+                                            Apagar Conta
+                                        </Button>
+                                    </Col>
+                                </Row>
+                            )}
 
                             <ShowIfAdmin>
                                 <div className="mt-4">
@@ -207,23 +211,8 @@ const ProfileManagement: React.FC = () => {
                             </ShowIfAdmin>
                         </Card.Body>
                     </Card>
-                    {user && (
-                        <Card className="mt-4">
-                            <Card.Header>
-                                <Card.Title>Apagar Perfil</Card.Title>
-                            </Card.Header>
-                            <Card.Body className="d-flex align-items-center align-content-end justify-content-end">
-                                <Button
-                                    variant="danger"
-                                    size="lg"
-
-                                    onClick={() => handleDeleteUser(user.username)}
-                                >
-                                    Apagar Conta
-                                </Button>
-                            </Card.Body>
-                        </Card>
-                    )}
+                    
+                    
                 </Col>
             </Row>
         </Container>
