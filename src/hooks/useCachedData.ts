@@ -8,7 +8,7 @@ interface CachedData<T> {
 export function useCachedData<T>(
     fetchFn: () => Promise<T>,
     cacheKey: string,
-    interval: number = 10000
+    interval: number | null = 10000
 ): T | null {
     const [cache, setCache] = useState<CachedData<T>>(() => {
         const stored = localStorage.getItem(cacheKey);
@@ -23,8 +23,10 @@ export function useCachedData<T>(
     
     useEffect(() => {
         fetchFn().then(updateCache);
-        const intervalId = setInterval(() => fetchFn().then(updateCache), interval);
-        return () => clearInterval(intervalId);
+        if (interval) {
+            const intervalId = setInterval(() => fetchFn().then(updateCache), interval);
+            return () => clearInterval(intervalId);
+        }
     }, [interval, cacheKey]);
     
     return cache.data;
