@@ -30,11 +30,8 @@ export const EventCalendar = () => {
     const handleDayClick = (value: Date) => {
         if (!eventsByDate) return;
         const date = value.toISOString().split("T")[0];
-        console.log(eventsByDate[date]);
-        console.log(date);
         if (eventsByDate[date]) {
             setSelectedDate(date);
-            console.log(selectedDate, "A");
         } else {
             setSelectedDate(null);
         }

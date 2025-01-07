@@ -38,7 +38,7 @@ export const ListEvents: React.FC<{events: Event[]}> = ({events}) => {
     
     const getReport = async (reportID: string) => {
         const report = await new EventsApi().reportEventsEventIdReportGet({eventId: reportID});
-        generatePDF(report).then(() => console.log("Printing..."));
+        generatePDF(report).then(() => {});
     };
 
     return (
