@@ -15,6 +15,7 @@ import {
 } from 'chart.js';
 import {CashflowForecast, FinanceApi} from "api";
 import {formatCurrency} from "utils/currency.ts";
+import {useForecast} from "hooks/useForecast.ts";
 
 ChartJS.register(
     CategoryScale,
@@ -26,33 +27,11 @@ ChartJS.register(
     Legend
 );
 
-const apiFunctions = {
-    getForecastCashflow: async (days?: number) => await new FinanceApi().forecastCashflowFinanceCashflowForecastGet({ days })
-};
-
 const CashflowForecastPage = () => {
-    const [forecastData, setForecastData] = useState<CashflowForecast | null>(null);
     const [days, setDays] = useState(30);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
-    const fetchForecast = async () => {
-        try {
-            setLoading(true);
-            setError(null);
-            const response = await apiFunctions.getForecastCashflow(days);
-            setForecastData(response);
-        } catch {
-            setError('Failed to fetch forecast data');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchForecast();
-    }, []);
-
+    
+    const { forecastData, loading, error, refetch: fetchForecast } = useForecast(days);
+    
     const chartData: ChartData<"line", number[], string> | null = forecastData ? {
         labels: forecastData.dailyForecasts.map(f => new Date(f.date).toISOString().split('T')[0]),
         datasets: [
@@ -169,8 +148,8 @@ const CashflowForecastPage = () => {
                     </Col>
                 </Row>
             )}
-
-            {forecastData && (
+            
+            {forecastData ? (
                 <>
                     <Row className="mb-4">
                         <Col md={4}>
@@ -188,7 +167,7 @@ const CashflowForecastPage = () => {
                                 <Card.Body>
                                     <Card.Title>Período de Previsão</Card.Title>
                                     <h3 className="text-primary">
-                                        {forecastData.forecastPeriodDays} Days
+                                        {forecastData.forecastPeriodDays} Dias
                                     </h3>
                                 </Card.Body>
                             </Card>
@@ -208,19 +187,20 @@ const CashflowForecastPage = () => {
                             </Card>
                         </Col>
                     </Row>
-
+                    
                     <Row className="mb-4">
                         <Col>
                             <Card>
                                 <Card.Body>
-                                    <div style={{ height: '400px' }}>
-                                        <Line data={chartData as ChartData<"line", number[], string>} options={chartOptions} />
+                                    <div style={{height: '400px'}}>
+                                        <Line data={chartData as ChartData<"line", number[], string>}
+                                              options={chartOptions}/>
                                     </div>
                                 </Card.Body>
                             </Card>
                         </Col>
                     </Row>
-
+                    
                     <Row>
                         <Col>
                             <Card>
@@ -253,7 +233,11 @@ const CashflowForecastPage = () => {
                         </Col>
                     </Row>
                 </>
-            )}
+            ) : (
+                <div className="text-center py-5">
+                <Spinner animation="border" variant="primary"/>
+                </div>
+                )}
         </Container>
     );
 };
