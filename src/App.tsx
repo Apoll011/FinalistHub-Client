@@ -1,4 +1,4 @@
-// Import node module libraries
+ // Import node module libraries
 import React, { Suspense } from "react";
 import { Outlet } from "react-router";
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
