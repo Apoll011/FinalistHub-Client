@@ -32,6 +32,31 @@ FinalistHub-Client is the frontend interface for interacting with FinalistHub's 
 
 ---
 
+## Running with Docker Compose
+
+### Quick Start from Server Directory
+
+**Test Mode** (with SQLite and default admin):
+```bash
+cd ../FinalistHub-server
+./run.sh --test
+```
+
+**Production Mode** (with SQLiteCloud):
+```bash
+cd ../FinalistHub-server
+./run.sh
+```
+
+Both will build and run:
+- **Client**: http://localhost:5173 (cloned from GitHub)
+- **Server**: http://localhost:8000
+- **API Docs**: http://localhost:8000/docs
+
+Test mode includes default admin account: `admin` / `admin`
+
+---
+
 ## Features
 
 - **Event Management**: Organize and manage events, view event details, and track ticket sales.
