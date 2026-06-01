@@ -30,27 +30,25 @@
 
 FinalistHub-Client is the frontend interface for interacting with FinalistHub's event management and financial services. Built using TypeScript and React, it enables users to manage a wide range of data, including events, financial transactions, and inventory reports. It provides dashboards, charts, and insights to track real-time business activities effectively.
 
----
-
 ## Running with Docker Compose
 
-### Quick Start from Server Directory
+### Quick Start
+
+From the server repository (https://github.com/Apoll011/FinalistHub-server):
 
 **Test Mode** (with SQLite and default admin):
 ```bash
-cd ../FinalistHub-server
 ./run.sh --test
 ```
 
 **Production Mode** (with SQLiteCloud):
 ```bash
-cd ../FinalistHub-server
 ./run.sh
 ```
 
 Both will build and run:
-- **Client**: http://localhost:5173 (cloned from GitHub)
-- **Server**: http://localhost:8000
+- **Client** (from this repo): http://localhost:5173
+- **Server** (from FinalistHub-server): http://localhost:8000
 - **API Docs**: http://localhost:8000/docs
 
 Test mode includes default admin account: `admin` / `admin`
