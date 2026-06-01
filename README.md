@@ -36,7 +36,7 @@ FinalistHub-Client is the frontend interface for interacting with FinalistHub's 
 
 From the server repository (https://github.com/Apoll011/FinalistHub-server):
 
-**Test Mode** (with SQLite and default admin):
+**Test Mode** (with SQLite):
 ```bash
 ./run.sh --test
 ```
@@ -51,7 +51,15 @@ Both will build and run:
 - **Server** (from FinalistHub-server): http://localhost:8000
 - **API Docs**: http://localhost:8000/docs
 
-Test mode includes default admin account: `admin` / `admin`
+### Creating an Admin User
+
+1. Go to the sign-up page: http://localhost:5173/auth/sign-up
+2. Enter your username and password
+3. Check the checkbox: **"É um Administrador?"** (Are you an admin?)
+4. Enter the admin password when prompted
+5. Complete the sign-up
+
+You now have admin access to the application!
 
 ---
 
