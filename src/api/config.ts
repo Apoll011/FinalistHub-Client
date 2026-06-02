@@ -17,7 +17,7 @@ export const getApiBaseUrl = (): string => {
   }
 
   // Default fallback for production
-  return 'https://finalisthub-server.onrender.com';
+  return 'http://localhost:8000';
 };
 
 export const API_CONFIG = {
