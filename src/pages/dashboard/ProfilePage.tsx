@@ -13,10 +13,12 @@ const ProfileManagement: React.FC = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     
+
     const { users, loadUsers } = useGetUsers(setError);
-    
-    const profileImage = useProfilePicture(user?.username || "");
-    
+        
+    const [ profileImage ] = useProfilePicture(user?.username || "")
+
+
     const handleChangePassword = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
@@ -54,7 +56,8 @@ const ProfileManagement: React.FC = () => {
     };
     
     const getProfileImage = (username: string) => {
-        return `https://api.multiavatar.com/${username.toLowerCase()}.svg`;
+        const profileImage = useProfilePicture(username);
+        return profileImage
     };
 
     return (
