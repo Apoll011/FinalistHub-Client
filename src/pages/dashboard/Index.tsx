@@ -28,7 +28,7 @@ const Dashboard = () => {
         {
             id: 1,
             title: 'Saldo Atual',
-            value: balanceData?.currentBalance,
+            value: balanceData ? balanceData?.currentBalance : 0,
             icon: <CurrencyDollar size={18} />,
             statInfo: balanceData?.lastUpdated?.toLocaleString() || "",
             statusColor: 'primary'
@@ -36,7 +36,7 @@ const Dashboard = () => {
         {
             id: 2,
             title: 'Ganho Total',
-            value: profitData?.totalRevenue,
+            value: profitData ? profitData?.totalRevenue : 0,
             icon: <ArrowUpCircle size={18} />,
             statInfo: `${profitData?.period.year}/${profitData?.period.month}`,
             statusColor: 'primary'
@@ -44,7 +44,7 @@ const Dashboard = () => {
         {
             id: 3,
             title: 'Total de Gastos',
-            value: profitData?.totalExpenses,
+            value: profitData ? profitData?.totalExpenses : 0,
             icon: <ArrowDownCircle size={18} />,
             statInfo: `${profitData?.period.year}/${profitData?.period.month}`,
             statusColor: 'danger'
