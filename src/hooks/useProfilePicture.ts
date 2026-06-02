@@ -12,7 +12,7 @@ export const useProfilePicture = (username: string) => {
     }, [username]);
     
     const getProfileImage = (username: string) => {
-        return `https://api.multiavatar.com/${username.toLowerCase()}.svg`;
+        return `https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=${username.toLowerCase()}`;
     };
     
     return profileImage;
