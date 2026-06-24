@@ -2,7 +2,7 @@ import {Balance, CapacityAnalysisResponse, EventsApi, FinanceApi, ProfitReportRe
 import { useCachedData } from "./useCachedData";
 import {TIMES} from "utils/times.ts";
 
-export const useResumeData = () => {
+export const useResumeData = (enabled = true) => {
     const financeApi = new FinanceApi();
     const eventsApi = new EventsApi();
     
@@ -11,18 +11,23 @@ export const useResumeData = () => {
             currentBalance: (await financeApi.getTotalBalanceFinanceBalanceGet()).currentBalance,
             lastUpdated: new Date(),
         }),
-        'balance-cache'
+        'balance-cache',
+        TIMES.minutes(5),
+        { enabled }
     );
     
     const eventToHappen = useCachedData<CapacityAnalysisResponse>(
         () => eventsApi.getCapacityAnalysisEventsCapacityAnalysisGet(),
         'events-cache',
-        TIMES.ONE_MINUTE
+        TIMES.minutes(5),
+        { enabled }
     );
     
     const profitData = useCachedData<ProfitReportResponse>(
         () => financeApi.getProfitReportFinanceProfitGet(),
         'profit-cache'
+        , TIMES.minutes(5),
+        { enabled }
     );
     
     return { balanceData, eventToHappen, profitData };

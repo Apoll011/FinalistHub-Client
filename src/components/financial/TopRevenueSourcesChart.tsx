@@ -14,10 +14,8 @@ const TopRevenueSourcesChart = () => {
   const data  = useCachedData<TopRevenueSourcesResponse>(
       () => new FinanceApi().getTopRevenueSourcesFinanceTopRevenueSourcesGet({limit: 3}),
       'top-revenue-sources-cache',
-      TIMES.NEVER
+      TIMES.minutes(10)
   );
-
-  console.log(data);
   
   const { sources, topRevenueChartSeries, topRevenueChartLabels } = useTopRevenueSources(data);
   
@@ -63,17 +61,26 @@ const TopRevenueSourcesChart = () => {
   };
   
   return (
-      <Card className="h-100">
+      <Card className="h-100 shadow-sm border-0">
         <Card.Body>
-          <div className="d-flex align-items-center justify-content-between">
+          <div className="d-flex align-items-start justify-content-between mb-3">
             <div>
-              <h4 className="mb-0">Top 3 Fontes de Rendimento</h4>
+              <p className="text-uppercase text-muted fw-semibold small mb-1">Receita</p>
+              <h4 className="mb-0">Top 3 fontes de rendimento</h4>
             </div>
           </div>
           
-          { sources ? (
-              <div className="d-flex justify-content-around">
-                <div className="mb-3">
+          { sources === undefined || sources === null ? (
+              <div className="text-center py-5">
+                <Spinner animation="border" variant="primary"/>
+              </div>
+          ) : Array.isArray(sources) && sources.length === 0 ? (
+              <div className="text-center py-5">
+                <p className="text-muted mb-0">Nenhuma fonte de rendimento encontrada.</p>
+              </div>
+          ) : (
+              <div className="row g-4 align-items-center">
+                <div className="col-lg-6">
                   <Chart
                       options={performanceChartOptions}
                       series={topRevenueChartSeries}
@@ -81,18 +88,23 @@ const TopRevenueSourcesChart = () => {
                       width="100%"
                   />
                 </div>
-                <div className="align-items-center justify-content-around">
-                  {sources.map((source, index) => <div key={source.category}>
-                    <h3 className="mt-3 mb-1 fw-bold"><i
-                        className={`fe fe-dollar-sign text-${getSourceColor(index)} fs-3`}></i> {formatCurrency(source.totalAmount)} ({source.transactionCount})
-                    </h3>
-                    <small>{source.category}</small>
-                  </div>)}
+                <div className="col-lg-6">
+                  <div className="d-grid gap-3">
+                    {sources.map((source, index) => (
+                        <div key={source.category} className="p-3 rounded-3 bg-light">
+                          <div className="d-flex align-items-center justify-content-between">
+                            <div>
+                              <div className="fw-semibold">{source.category}</div>
+                              <small className="text-muted">{source.transactionCount} transações</small>
+                            </div>
+                            <div className={`text-${getSourceColor(index)} fw-bold`}>
+                              {formatCurrency(source.totalAmount)}
+                            </div>
+                          </div>
+                        </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-          ) : (
-              <div className="text-center py-5">
-                <Spinner animation="border" variant="primary"/>
               </div>
           )}
         </Card.Body>

@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {CashflowForecast, FinanceApi} from "api";
 
 export function useForecast(days: number) {
@@ -6,7 +6,7 @@ export function useForecast(days: number) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     
-    const fetchForecast = async () => {
+    const fetchForecast = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -17,11 +17,11 @@ export function useForecast(days: number) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [days]);
     
     useEffect(() => {
-        fetchForecast();
-    }, []);
+        void fetchForecast();
+    }, [fetchForecast]);
     
     return { forecastData, loading, error, refetch: fetchForecast };
     

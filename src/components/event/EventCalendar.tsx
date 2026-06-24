@@ -42,23 +42,28 @@ export const EventCalendar = () => {
     };
 
     return (
-        <Row className="my-6">
-            <Col xl={4} lg={12} md={12} xs={12} className="mb-6 mb-xl-0">
-                <Card className="h-100">
+        <Row className="g-4">
+            <Col xl={4} lg={12}>
+                <Card className="h-100 shadow-sm border-0">
                     <Card.Body>
-                        <h2 className="text-xl font-semibold mb-4">Calendário de Eventos</h2>
+                        <div className="d-flex align-items-start justify-content-between mb-3">
+                            <div>
+                                <p className="text-uppercase text-muted fw-semibold small mb-1">Agenda</p>
+                                <h4 className="mb-0">Calendário de eventos</h4>
+                            </div>
+                        </div>
                         { eventsByDate ? (
                             <Calendar
                                 onClickDay={handleDayClick}
                                 tileClassName={({ date }) => {
                                     const dateString = date.toISOString().split("T")[0];
-                                    return eventsByDate[dateString] ? "fw-bold text-white bg-warning" : "";
+                                    return eventsByDate[dateString] ? "fw-bold text-white bg-warning rounded-2" : "";
                                 }}
                                 tileContent={({ date }) => {
                                     const dateString = date.toISOString().split("T")[0];
                                     return eventsByDate[dateString] ? (
                                         <div className="position-absolute bottom-0 start-50 translate-middle-x mb-1">
-                                            <div className="rounded-circle bg-danger" style={{ width: '4px', height: '4px' }}></div>
+                                            <div className="rounded-circle bg-danger" style={{ width: "4px", height: "4px" }}></div>
                                         </div>
                                     ) : null;
                                 }}
@@ -71,38 +76,36 @@ export const EventCalendar = () => {
                     </Card.Body>
                 </Card>
             </Col>
-            <Col xl={8} lg={12} md={12} xs={12} className="mb-6 mb-xl-0">
-                <Card className="h-100">
+            <Col xl={8} lg={12}>
+                <Card className="h-100 shadow-sm border-0">
                     <Card.Body>
                         {eventsByDate && selectedDate ? (
                             <div className="h-full">
-                                <h3 className="text-lg font-semibold mb-4">
-                                    Eventos em {selectedDate.toString()}
-                                </h3>
+                                <div className="d-flex align-items-center justify-content-between mb-3">
+                                    <div>
+                                        <p className="text-uppercase text-muted fw-semibold small mb-1">Detalhes do dia</p>
+                                        <h4 className="mb-0">{selectedDate.toString()}</h4>
+                                    </div>
+                                </div>
                                 <div className="overflow-y-auto overflow-x-hidden" style={{ height: "50vh" }}>
-                                    <div className="row g-3 px-2">
+                                    <div className="row g-3 px-1">
                                         {eventsByDate[selectedDate].map((event) => (
                                             <div className="col-md-6" key={event.id}>
                                                 <Card
-                                                    className="h-100"
+                                                    className="h-100 border-0 shadow-sm"
+                                                    role="button"
                                                     style={{cursor: "pointer"}}
                                                     onClick={() => handleEditClick(event.id)}
                                                 >
                                                     <Card.Body>
-                                                        <div className="p-4 bg-gray-50 rounded-lg shadow-md">
-                                                            <div className="text-lg font-bold mb-2">{event.name}</div>
-                                                            <div className="text-sm text-gray-600 mb-1">
-                                                                <strong>Hora:</strong> {event.time}
-                                                            </div>
-                                                            <div className="text-sm text-gray-600 mb-1">
-                                                                <strong>Local:</strong> {event.location}
-                                                            </div>
-                                                            <div className="text-sm text-gray-600 mb-2">
-                                                                <strong>Descrição:</strong> {event.description || "Nenhuma descrição fornecida."}
-                                                            </div>
-                                                            <div className="text-sm text-gray-600">
-                                                                <strong>Estado:</strong> {getStatusBadge(event.status)}
-                                                            </div>
+                                                        <div className="d-flex align-items-start justify-content-between mb-2">
+                                                            <h5 className="mb-0">{event.name}</h5>
+                                                            {getStatusBadge(event.status)}
+                                                        </div>
+                                                        <p className="text-muted mb-2">{event.description || "Nenhuma descrição fornecida."}</p>
+                                                        <div className="small text-muted">
+                                                            <div><strong>Hora:</strong> {event.time}</div>
+                                                            <div><strong>Local:</strong> {event.location}</div>
                                                         </div>
                                                     </Card.Body>
                                                 </Card>
@@ -116,15 +119,13 @@ export const EventCalendar = () => {
                                 <Spinner animation="border" variant="primary"/>
                             </div>
                         ) : (
-                            <div>
-                                <h3 className="text-lg font-semibold mb-4">Nenhuma data com eventos selecionada</h3>
-                                <p className="text-sm text-gray-600">Selecione um dia que tem eventos no calendário para ve-los.</p>
+                            <div className="text-center py-5">
+                                <h4 className="mb-2">Selecione uma data com eventos</h4>
+                                <p className="text-muted mb-0">Escolha um dia marcado no calendário para ver os eventos agendados.</p>
                             </div>
                         )}
                     </Card.Body>
                 </Card>
-
-
             </Col>
         </Row>
     );

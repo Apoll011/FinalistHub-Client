@@ -5,7 +5,6 @@
 import { Card } from "react-bootstrap";
 import { ProjectsStatsProps } from "types.ts";
 import React from "react";
-import AdminOnly from "components/auth/admin/admin_only.tsx";
 import {formatCurrency} from "utils/currency.ts";
 
 interface StatRightProps {
@@ -13,35 +12,34 @@ interface StatRightProps {
 }
 
 export const StatRightTopIcon: React.FC<StatRightProps> = ({ info }) => {
+  const hasValue = info.value !== null && info.value !== undefined;
+
   return (
-      <Card>
-        <Card.Body>
-          {info.value && info.statInfo ? (
-              <>
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <div>
-                    <h4 className="mb-0">{info.title}</h4>
-                  </div>
-                  <div className={`icon-shape icon-md bg-light-primary text-${info.statusColor} rounded-2`}>
-                    {info.icon}
-                  </div>
-                </div>
-                <div>
-                  
-                  <h3 className="fw-bold"><AdminOnly content={typeof info.value === "number" ? formatCurrency(info.value) : info.value}/></h3>
-                  <p
-                      className="mb-0 text-dark me-2"
-                      dangerouslySetInnerHTML={{__html: info.statInfo}}
-                  ></p>
-                </div>
-              </>
-          ) : (<div className="d-flex justify-content-center align-items-center">
-                <div className="spinner-border text-primary" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </div>
+    <Card className="h-100 shadow-sm border-0">
+      <Card.Body className="d-flex flex-column justify-content-between">
+        {hasValue && info.statInfo ? (
+          <>
+            <div className="d-flex justify-content-between align-items-start mb-3">
+              <div className="pe-3">
+                <p className="text-uppercase text-muted fw-semibold small mb-1">{info.title}</p>
+                <h3 className="mb-0">
+                  {typeof info.value === "number" ? formatCurrency(info.value) : info.value}
+                </h3>
               </div>
-          )}
-        </Card.Body>
-      </Card>
+              <div className={`icon-shape icon-md bg-light-primary text-${info.statusColor} rounded-3`}>
+                {info.icon}
+              </div>
+            </div>
+            <p className="mb-0 text-muted small">{info.statInfo}</p>
+          </>
+        ) : (
+          <div className="d-flex justify-content-center align-items-center py-4">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        )}
+      </Card.Body>
+    </Card>
   );
 };

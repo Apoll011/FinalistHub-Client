@@ -1,7 +1,6 @@
 import {EventsApi, EventStatisticsResponse} from "api";
-import {Card, Spinner} from "react-bootstrap";
+import {Card, Col, Row, Spinner} from "react-bootstrap";
 import React from "react";
-import AdminOnly from "components/auth/admin/admin_only.tsx";
 import {useCachedData} from "hooks/useCachedData.ts";
 import {formatCurrency} from "utils/currency.ts";
 import {TIMES} from "utils/times.ts";
@@ -14,46 +13,43 @@ export const EventSummary = () => {
         'events-summary-cache',
         TIMES.minutes(5)
     );
-    
+
     return  (
-        <Card className="h-100">
+        <Card className="h-100 shadow-sm border-0">
             <Card.Body>
                 { data ? (
                     <>
-                        <div className="d-flex align-items-center justify-content-between">
+                        <div className="d-flex align-items-start justify-content-between mb-4">
                             <div>
-                                <h4 className="mb-0">Sumario de Eventos</h4>
-                                <p className="text-muted">
-                                    Intervalo de Datas: {new Date(data.dateRange.start).toLocaleDateString()} - {new Date(data.dateRange.end).toLocaleDateString()}
+                                <p className="text-uppercase text-muted fw-semibold small mb-1">Resumo de eventos</p>
+                                <h4 className="mb-1">Atividade recente</h4>
+                                <p className="text-muted mb-0">
+                                    {new Date(data.dateRange.start).toLocaleDateString()} - {new Date(data.dateRange.end).toLocaleDateString()}
                                 </p>
                             </div>
-                        </div>
-                        <div className="d-flex align-items-center justify-content-around mt-4">
-                            <div className="text-center">
-                                <i className="fe fe-calendar text-primary fs-3"></i>
-                                <h1 className="mt-3 mb-1 fw-bold">{data.totalEvents}</h1>
-                                <p>Total de Eventos</p>
-                            </div>
-                            <div className="text-center">
-                                <i className="fe fe-check-circle text-success fs-3"></i>
-                                <h1 className="mt-3 mb-1 fw-bold">{data.activeEvents}</h1>
-                                <p>Eventos Ativos</p>
-                            </div>
-                            <div className="text-center">
-                                <i className="fe fe-lock text-warning fs-3"></i>
-                                <h1 className="mt-3 mb-1 fw-bold">{data.closedEvents}</h1>
-                                <p>Eventos Fechados</p>
-                            </div>
-                            <div className="text-center">
-                                <i className="fe fe-x-circle text-danger fs-3"></i>
-                                <h1 className="mt-3 mb-1 fw-bold">{data.cancelledEvents}</h1>
-                                <p>Eventos Cancelados</p>
+                            <div className="text-end">
+                                <p className="text-muted small mb-1">Receita total</p>
+                                <h3 className="mb-0 text-success">{formatCurrency(data.totalRevenue)}</h3>
                             </div>
                         </div>
-                        <div className="mt-6 text-center">
-                            <h5>Ganho Total</h5>
-                            <h2 className="fw-bold text-success"><AdminOnly content={formatCurrency(data.totalRevenue)}/></h2>
-                        </div>
+                        <Row className="g-3">
+                            {[
+                                { label: "Total de eventos", value: data.totalEvents, color: "primary", icon: "fe-calendar" },
+                                { label: "Eventos ativos", value: data.activeEvents, color: "success", icon: "fe-check-circle" },
+                                { label: "Eventos fechados", value: data.closedEvents, color: "warning", icon: "fe-lock" },
+                                { label: "Eventos cancelados", value: data.cancelledEvents, color: "danger", icon: "fe-x-circle" },
+                            ].map((item) => (
+                                <Col sm={6} xl={3} key={item.label}>
+                                    <div className="p-3 rounded-3 bg-light h-100">
+                                        <div className={`text-${item.color} mb-2`}>
+                                            <i className={`fe ${item.icon} fs-4`}></i>
+                                        </div>
+                                        <div className="fw-semibold small text-muted">{item.label}</div>
+                                        <div className="fw-bold fs-3">{item.value}</div>
+                                    </div>
+                                </Col>
+                            ))}
+                        </Row>
                     </>
                 ) : (
                     <div className="text-center py-5">
