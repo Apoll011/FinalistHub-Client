@@ -469,7 +469,7 @@ export class FinanceApi extends runtime.BaseAPI {
             headers: headerParameters,
             query: queryParameters,
         }, initOverrides);
-
+        console.log(response)
         return new runtime.JSONApiResponse(response, (jsonValue) => TopRevenueSourcesResponseFromJSON(jsonValue));
     }
 

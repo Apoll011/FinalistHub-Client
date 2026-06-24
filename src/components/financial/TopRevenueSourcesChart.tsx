@@ -16,6 +16,8 @@ const TopRevenueSourcesChart = () => {
       'top-revenue-sources-cache',
       TIMES.NEVER
   );
+
+  console.log(data);
   
   const { sources, topRevenueChartSeries, topRevenueChartLabels } = useTopRevenueSources(data);
   
