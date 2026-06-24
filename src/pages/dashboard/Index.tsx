@@ -1,6 +1,6 @@
 import React, { Fragment, useMemo, useState } from "react";
 import { Badge, Button, Card, Col, Container, Row } from "react-bootstrap";
-import { ArrowDownCircle, ArrowUpCircle, CalendarEvent, Percent, People } from "react-feather";
+import { ArrowDownCircle, ArrowUpCircle, Calendar, Percent, User } from "react-feather";
 import { CurrencyDollar, BoxArrowUpRight } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
 
@@ -63,7 +63,7 @@ const MemberDashboard: React.FC<{ userName: string }> = ({ userName }) => {
             id: 1,
             title: "Próximos eventos",
             value: upcomingEvents.length,
-            icon: <CalendarEvent size={18} />,
+            icon: <Calendar size={18} />,
             statInfo: "Agenda visível para a equipa",
             statusColor: "primary",
         },
@@ -71,7 +71,7 @@ const MemberDashboard: React.FC<{ userName: string }> = ({ userName }) => {
             id: 2,
             title: "Reuniões agendadas",
             value: upcomingMeetings.length,
-            icon: <People size={18} />,
+            icon: <User size={18} />,
             statInfo: "Próximas reuniões",
             statusColor: "success",
         },
