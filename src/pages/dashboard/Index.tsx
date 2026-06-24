@@ -252,22 +252,47 @@ const AdminDashboard: React.FC<{ userName: string }> = ({ userName }) => {
 
     return (
         <Fragment>
-            <div className="bg-primary py-5" />
-            <Container fluid className="mt-n5 px-4 px-lg-6 pb-4">
-                <Row className="g-4 mb-4 align-items-end">
+            <Container fluid className="py-4 px-4 px-lg-6">
+                <Row className="g-4 mb-4">
                     <Col lg={8}>
-                        <div className="text-white">
-                            <Badge bg="light" text="primary" className="mb-3">Admin dashboard</Badge>
-                            <h1 className="mb-2">Bem-vindo, {userName || "administrador"}</h1>
-                            <p className="mb-0 text-white-50">
-                                Aqui tens visão financeira, capacidade operacional e ferramentas rápidas de gestão.
-                            </p>
-                        </div>
+                        <Card className="h-100 shadow-sm border-0 bg-primary text-white">
+                            <Card.Body className="p-4 p-lg-5 d-flex flex-column flex-lg-row justify-content-between gap-4">
+                                <div className="pe-lg-5">
+                                    <Badge bg="light" text="primary" className="mb-3">Admin dashboard</Badge>
+                                    <h1 className="mb-2">Olá, {userName || "Administrador"}</h1>
+                                </div>
+                                <div className="d-flex flex-column gap-2 align-self-lg-center">
+                                    <Button variant="light" className="text-primary fw-semibold" onClick={() => navigate("/meeting")}>
+                                        Ver reuniões
+                                    </Button>
+                                    <Button variant="outline-light" onClick={() => navigate("/event/")}>
+                                        Explorar eventos
+                                    </Button>
+                                </div>
+                            </Card.Body>
+                        </Card>
                     </Col>
-                    <Col lg={4} className="text-lg-end">
-                        <Button variant="light" className="me-2 mb-2 mb-lg-0" onClick={() => setShowAddRevenueModal(true)}>Receita</Button>
-                        <Button variant="warning" className="me-2 mb-2 mb-lg-0" onClick={() => setShowAddExpenseModal(true)}>Despesa</Button>
-                        <Button variant="info" className="mb-2 mb-lg-0" onClick={() => setShowTransferModal(true)}>Transferir</Button>
+
+                    <Col lg={4} className="d-flex flex-column">
+                        <Card className="h-100 shadow-sm border-0 w-100">
+                            <Card.Body className="p-4 d-flex flex-column justify-content-between">
+                                <div>
+                                    <p className="text-uppercase text-muted fw-semibold small mb-1">Atalhos</p>
+                                    <h4 className="mb-3">Fluxo rápido</h4>
+                                </div>
+                                <div className="d-grid gap-2">
+                                    <Button variant="success" onClick={() => setShowAddRevenueModal(true)}>
+                                        Receita
+                                    </Button>
+                                    <Button variant="warning" className="text-dark" onClick={() => setShowAddExpenseModal(true)}>
+                                        Despesa
+                                    </Button>
+                                    <Button variant="info" className="text-dark" onClick={() => setShowTransferModal(true)}>
+                                        Transferir
+                                    </Button>
+                                </div>
+                            </Card.Body>
+                        </Card>
                     </Col>
                 </Row>
 
@@ -286,10 +311,13 @@ const AdminDashboard: React.FC<{ userName: string }> = ({ userName }) => {
                 </Row>
 
                 <Row className="g-4 mb-4">
-                    <Col lg={7}>
+                    <Col lg={12}>
                         <EventCalendar />
                     </Col>
-                    <Col lg={5}>
+                </Row>
+
+                <Row className="g-4 mb-4">
+                    <Col lg={12}>
                         <CapacityAnalysis capacityAnalysis={eventToHappen?.capacityAnalysis} />
                     </Col>
                 </Row>
