@@ -4,6 +4,7 @@ import { Container, Row, Col, Card, Form, Button, Alert, ListGroup } from 'react
 import ShowIfAdmin from "components/auth/admin/show_if_admin.tsx";
 import {useProfilePicture} from "hooks/useProfilePicture.ts";
 import useGetUsers from "hooks/useGetUsers.ts";
+import { LoadingSpinner } from 'components/LoadingSpinner';
 
 const ProfileManagement: React.FC = () => {
     const { user, changeUserRole, changePassword, deleteUser } = useAuth();
@@ -14,9 +15,16 @@ const ProfileManagement: React.FC = () => {
     const [success, setSuccess] = useState('');
     
 
-    const { users, loadUsers } = useGetUsers(setError);
-        
-    const [ profileImage ] = useProfilePicture(user?.username || "")
+    const { users, loaded, loadUsers } = useGetUsers(setError);
+    
+    const profileImage = useProfilePicture(user?.username || "")
+
+
+    if (!loaded) {
+        return (
+            <LoadingSpinner/>
+        );
+    }
 
 
     const handleChangePassword = async (e: React.FormEvent) => {
@@ -56,8 +64,7 @@ const ProfileManagement: React.FC = () => {
     };
     
     const getProfileImage = (username: string) => {
-        const profileImage = useProfilePicture(username);
-        return profileImage
+        return `https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=${username.toLowerCase()}`;
     };
 
     return (
@@ -154,7 +161,7 @@ const ProfileManagement: React.FC = () => {
                                                     >
                                                         <option value="">Selecionar Usuário</option>
                                                         {users.map((user) => (
-                                                            <option key={user.id} value={user.username}>
+                                                            <option key={user.username} value={user.username}>
                                                                 {user.username}
                                                             </option>
                                                         ))}
@@ -185,7 +192,7 @@ const ProfileManagement: React.FC = () => {
                                     <ListGroup>
                                         {users.map((u) => (
                                             <ListGroup.Item
-                                                key={u.id}
+                                                key={u.username}
                                                 className="d-flex justify-content-between align-items-center"
                                             >
                                                 <div>

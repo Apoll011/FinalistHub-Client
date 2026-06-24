@@ -1,7 +1,7 @@
  // Import node module libraries
 import React, { Suspense } from "react";
 import { Outlet } from "react-router";
-import {createBrowserRouter, RouterProvider} from "react-router-dom";
+import {createHashRouter, RouterProvider} from "react-router-dom";
 import EditEventPage from "pages/dashboard/events/EventPage.tsx";
 import EventsPage from "pages/dashboard/events/EventsPage.tsx";
 import MeetingManagement from "pages/dashboard/MeetingsPage.tsx";
@@ -30,7 +30,7 @@ const Dashboard = React.lazy(() => import("pages/dashboard/Index"));
 const NotFound = React.lazy(() => import("pages/dashboard/pages/NotFound"));
 
 const App = () => {
-  const router = createBrowserRouter([
+  const router = createHashRouter([
     {
       id: "root",
       path: "/",

@@ -12,6 +12,7 @@ export const useProfilePicture = (username: string) => {
     }, [username]);
     
     const getProfileImage = (username: string) => {
+        console.log(username);
         return `https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=${username.toLowerCase()}`;
     };
     
