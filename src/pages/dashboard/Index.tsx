@@ -93,10 +93,7 @@ const MemberDashboard: React.FC<{ userName: string }> = ({ userName }) => {
                         <Card.Body className="p-4 p-lg-5 d-flex flex-column flex-lg-row justify-content-between gap-4">
                             <div className="pe-lg-5">
                                 <Badge bg="light" text="primary" className="mb-3">Member dashboard</Badge>
-                                <h1 className="mb-2">Olá, {userName || "equipa"}</h1>
-                                <p className="mb-0 text-white-50">
-                                    Reuniões, eventos e atalhos úteis sem ruído administrativo.
-                                </p>
+                                <h1 className="mb-2">Olá, {userName || "Membro"}</h1>
                             </div>
                             <div className="d-flex flex-column gap-2 align-self-lg-center">
                                 <Button variant="light" className="text-primary fw-semibold" onClick={() => navigate("/meeting")}>
@@ -212,6 +209,8 @@ const AdminDashboard: React.FC<{ userName: string }> = ({ userName }) => {
     const [showAddRevenueModal, setShowAddRevenueModal] = useState(false);
     const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
     const [showTransferModal, setShowTransferModal] = useState(false);
+
+    const navigate = useNavigate();
 
     const { balanceData, eventToHappen, profitData } = useResumeData(true);
 
